@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 const binSubDir = "bin"
@@ -137,7 +138,7 @@ func extractFfmpeg(archivePath, binDir string) error {
 	switch {
 	case filepath.Ext(archivePath) == ".zip":
 		return extractZip(archivePath, binDir)
-	case filepath.Ext(archivePath) == ".xz" || filepath.Ext(archivePath[:len(archivePath)-3]) == ".tar":
+	case filepath.Ext(archivePath) == ".xz" || strings.HasSuffix(archivePath, ".tar.xz"):
 		return extractTarXz(archivePath, binDir)
 	default:
 		return fmt.Errorf("unsupported archive format: %s", filepath.Ext(archivePath))

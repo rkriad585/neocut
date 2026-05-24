@@ -18,7 +18,7 @@ func RunConfigForm() (*config.Config, error) {
 		keepSilence      = 100
 	)
 
-	outputDir := config.GetOutputDir()
+	outputDir := config.GetOutputDir(nil)
 
 	form := huh.NewForm(
 		huh.NewGroup(

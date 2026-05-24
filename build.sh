@@ -11,6 +11,7 @@ PUBLISHER_NAME="rkriad585"
 PUBLISHER_EMAIL="rkriad585@gmail.com"
 
 LDFLAGS="-X 'neocut/internal/config.Commit=${COMMIT}'"
+LDFLAGS="${LDFLAGS} -X 'neocut/internal/config.Version=${VERSION}'"
 LDFLAGS="${LDFLAGS} -X 'neocut/internal/config.PublisherName=${PUBLISHER_NAME}'"
 LDFLAGS="${LDFLAGS} -X 'neocut/internal/config.PublisherEmail=${PUBLISHER_EMAIL}'"
 

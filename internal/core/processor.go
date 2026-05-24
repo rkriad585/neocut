@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Vernacular-ai/godub"
@@ -13,6 +14,21 @@ import (
 	"neocut/internal/config"
 	"neocut/internal/ffmpeg"
 )
+
+var quietMode bool
+var quietMu sync.Mutex
+
+func SetQuietMode(q bool) {
+	quietMu.Lock()
+	quietMode = q
+	quietMu.Unlock()
+}
+
+func isQuiet() bool {
+	quietMu.Lock()
+	defer quietMu.Unlock()
+	return quietMode
+}
 
 func step(label string, fn func() error) error {
 	done := make(chan error, 1)
@@ -26,6 +42,21 @@ func step(label string, fn func() error) error {
 		}()
 		done <- fn()
 	}()
+
+	if isQuiet() {
+		err := func() (e error) {
+			defer func() {
+				if r := recover(); r != nil {
+					e = fmt.Errorf("panic: %v", r)
+				}
+			}()
+			return fn()
+		}()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		}
+		return err
+	}
 
 	i := 0
 	for {
@@ -47,6 +78,10 @@ func step(label string, fn func() error) error {
 }
 
 func exportWithProgress(exporter *godub.Exporter, segment *godub.AudioSegment) error {
+	if isQuiet() {
+		return exporter.Export(segment)
+	}
+
 	done := make(chan struct{})
 	blocks := []string{"▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"}
 	width := 30
@@ -83,6 +118,8 @@ func exportWithProgress(exporter *godub.Exporter, segment *godub.AudioSegment) e
 }
 
 func Process(cfg *config.Config) error {
+	SetQuietMode(cfg.Quiet)
+
 	if err := ffmpeg.Ensure(); err != nil {
 		return fmt.Errorf("ffmpeg setup failed: %w", err)
 	}
@@ -130,7 +167,7 @@ func Process(cfg *config.Config) error {
 		return err
 	}
 
-	outputDir := config.GetOutputDir()
+	outputDir := config.GetOutputDir(cfg)
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
@@ -153,9 +190,13 @@ func Process(cfg *config.Config) error {
 		return fmt.Errorf("export failed: %w", err)
 	}
 
-	fmt.Printf("  \u2713 Exported to %s\n", outputPath)
-	fmt.Println()
-	fmt.Printf("  Done! (OS: %s/%s)\n", runtime.GOOS, runtime.GOARCH)
-	fmt.Println()
+	if !isQuiet() {
+		fmt.Printf("  \u2713 Exported to %s\n", outputPath)
+		fmt.Println()
+		fmt.Printf("  Done! (OS: %s/%s)\n", runtime.GOOS, runtime.GOARCH)
+		fmt.Println()
+	} else {
+		fmt.Println(outputPath)
+	}
 	return nil
 }

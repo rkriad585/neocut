@@ -8,12 +8,13 @@ All configuration is passed via CLI flags. There is no persistent configuration 
 |------|---------|-------------|
 | `-i / --input` | `""` | Input MP3 file path (required unless using `--tui`) |
 | `-o / --output` | auto | Output filename; defaults to `{input}_no_silence.mp3` |
+| `-d / --output-dir` | `~/Downloads/neocut/` | Custom output directory |
+| `-q / --quiet` | `false` | Suppress banner, spinners, and progress |
 | `-m / --min-silence-len` | `1000` ms | Minimum duration of silence to detect |
 | `-s / --silence-thresh` | `-16` dBFS | Volume threshold; segments below this are considered silence |
 | `-k / --keep-silence` | `100` ms | Silence to preserve at the boundaries of kept segments |
 | `-e / --seek-step` | `1` ms | Precision of silence detection (lower = more accurate but slower) |
 | `-t / --tui` | `false` | Launch interactive form instead of parsing flags |
-| `-c / --cnf / --config` | `""` | Path to config file (reserved for future use) |
 
 ## Silence detection parameters
 
@@ -53,7 +54,7 @@ The step size in milliseconds for detecting silence. Lower values give more prec
 
 | Directory | Purpose | Configurable |
 |-----------|---------|-------------|
-| `~/Downloads/neocut/` | Output directory for processed files | No |
+| `~/Downloads/neocut/` | Default output directory for processed files | Via `--output-dir` / `-d` |
 | `~/.config/neostore/neocut/` | Config and runtime directory (ffmpeg binary, which.cmd shim) | No |
 | `~/.config/neostore/neocut/bin/` | Downloaded ffmpeg and installed neocut binary | No |
 

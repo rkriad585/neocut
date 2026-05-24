@@ -9,6 +9,7 @@ import (
 
 var (
 	Commit         = "unknown"
+	Version        = "unknown"
 	PublisherName  = "unknown"
 	PublisherEmail = "unknown"
 )
@@ -16,14 +17,18 @@ var (
 type Config struct {
 	InputFile     string
 	OutputName    string
-	ConfigFile    string
 	MinSilenceLen int
 	SilenceThresh float64
 	KeepSilence   int
 	SeekStep      int
+	OutputDir     string
+	Quiet         bool
 }
 
 func ReadVersion() string {
+	if Version != "unknown" && Version != "" {
+		return Version
+	}
 	data, err := os.ReadFile(".version")
 	if err != nil {
 		return "unknown"
@@ -37,12 +42,17 @@ func PrintBanner(version, commit string) {
 	fmt.Printf("│      Author : RK Riad Khan                │\n")
 	fmt.Printf("│      Version: %-28s│\n", version)
 	fmt.Printf("│      Commit : %-28s│\n", commit)
+	fmt.Printf("│      %-38s│\n", PublisherName)
+	fmt.Printf("│      %-38s│\n", PublisherEmail)
 	fmt.Println("│      GitHub : rkriad585/neocut             │")
 	fmt.Println("╰───────────────────────────────────────────╯")
 	fmt.Println()
 }
 
-func GetOutputDir() string {
+func GetOutputDir(cfg *Config) string {
+	if cfg != nil && cfg.OutputDir != "" {
+		return cfg.OutputDir
+	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "."

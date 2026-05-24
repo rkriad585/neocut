@@ -12,13 +12,14 @@ neocut [command]
 | Flag | Short | Type | Default | Description |
 |------|-------|------|---------|-------------|
 | `--input` | `-i` | string | `""` | Path to the input MP3 file |
-| `--output` | `-o` | string | auto | Output filename (saved to `~/Downloads/neocut/`) |
+| `--output` | `-o` | string | auto | Output filename (saved to output-dir) |
+| `--output-dir` | `-d` | string | `~/Downloads/neocut/` | Custom output directory |
 | `--tui` | `-t` | bool | `false` | Launch interactive TUI form |
+| `--quiet` | `-q` | bool | `false` | Suppress banner, spinners, and progress |
 | `--min-silence-len` | `-m` | int | `1000` | Minimum silence length in milliseconds |
 | `--silence-thresh` | `-s` | float | `-16` | Silence threshold in dBFS |
 | `--keep-silence` | `-k` | int | `100` | Silence to keep at boundaries in ms |
 | `--seek-step` | `-e` | int | `1` | Seek step in milliseconds (lower = more precise) |
-| `--config` / `--cnf` | `-c` | string | `""` | Path to config file |
 | `--selfuninstall` | | bool | `false` | Remove neocut and its config directory |
 | `--version` | `-v` | | | Print version and exit |
 | `--help` | `-h` | | | Print help and exit |
@@ -66,6 +67,22 @@ neocut -i interview.mp3 -m 2000 -s -12 -k 200
 - `-m 2000`: only remove silences of 2 seconds or more
 - `-s -12`: higher threshold detects fewer segments as silence
 - `-k 200`: keep 200ms of natural silence at boundaries
+
+### Custom output directory
+
+```bash
+neocut -i input.mp3 -d /tmp/processed
+```
+
+Saves output to `/tmp/processed/input_no_silence.mp3` instead of `~/Downloads/neocut/`.
+
+### Quiet mode (scripting)
+
+```bash
+neocut -i input.mp3 -q
+```
+
+Suppresses the banner, animated spinners, and progress bar. Only prints the output path on success. Useful for scripts and pipes.
 
 ### High precision seeking
 

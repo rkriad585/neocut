@@ -32,7 +32,7 @@ The installer:
 ```bash
 git clone https://github.com/rkriad585/neocut.git
 cd neocut
-go build -ldflags "-X neocut/internal/config.Commit=$(git rev-parse --short HEAD) -X neocut/internal/config.PublisherName=$(whoami) -X neocut/internal/config.PublisherEmail=$(whoami)@example.com" -o neocut ./cmd/neocut/
+go build -ldflags "-X neocut/internal/config.Commit=$(git rev-parse --short HEAD) -X neocut/internal/config.Version=$(cat .version) -X neocut/internal/config.PublisherName=$(whoami) -X neocut/internal/config.PublisherEmail=$(whoami)@example.com" -o neocut ./cmd/neocut/
 ```
 
 ### Option 3: Cross-platform build script

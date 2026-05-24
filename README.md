@@ -45,7 +45,7 @@ curl -fsSL https://raw.githubusercontent.com/rkriad585/neocut/main/installer.sh 
 ```bash
 git clone https://github.com/rkriad585/neocut.git
 cd neocut
-go build -ldflags "-X neocut/internal/config.Commit=$(git rev-parse --short HEAD)" -o neocut ./cmd/neocut/
+go build -ldflags "-X neocut/internal/config.Commit=$(git rev-parse --short HEAD) -X neocut/internal/config.Version=$(cat .version)" -o neocut ./cmd/neocut/
 ```
 
 ### Cross-platform build
@@ -74,13 +74,14 @@ neocut -i input.mp3 [-o output.mp3] [flags]
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
 | `--input` | `-i` | `""` | Input MP3 file (required) |
-| `--output` | `-o` | auto | Output filename (saved to `~/Downloads/neocut/`) |
+| `--output` | `-o` | auto | Output filename (saved to output-dir) |
+| `--output-dir` | `-d` | `~/Downloads/neocut/` | Output directory |
 | `--tui` | `-t` | `false` | Interactive TUI mode |
+| `--quiet` | `-q` | `false` | Suppress banner, spinners, and progress |
 | `--min-silence-len` | `-m` | `1000` | Minimum silence length in ms |
 | `--silence-thresh` | `-s` | `-16` | Silence threshold in dBFS |
 | `--keep-silence` | `-k` | `100` | Silence to keep at boundaries in ms |
 | `--seek-step` | `-e` | `1` | Seek step in ms |
-| `--config`/`--cnf` | `-c` | `""` | Path to config file |
 | `--selfuninstall` | | `false` | Remove neocut and its config directory |
 | `--version` | `-v` | | Print version |
 | `--help` | `-h` | | Print help |

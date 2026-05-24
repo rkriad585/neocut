@@ -63,3 +63,8 @@ neocut/
 | Audio processing | [godub](https://github.com/Vernacular-ai/godub) |
 | TUI forms | [huh](https://github.com/charmbracelet/huh) |
 | Audio codec | ffmpeg (auto-downloaded) |
+
+## Version
+
+- Injected via ldflags at build time (`Version`), falling back to `.version` file read for development
+- Also injected: `Commit` (git hash), `PublisherName`, `PublisherEmail`

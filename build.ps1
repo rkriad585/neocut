@@ -12,6 +12,7 @@ $PublisherEmail = "rkriad585@gmail.com"
 
 $LdFlags = @(
     "-X 'neocut/internal/config.Commit=$Commit'",
+    "-X 'neocut/internal/config.Version=$Version'",
     "-X 'neocut/internal/config.PublisherName=$PublisherName'",
     "-X 'neocut/internal/config.PublisherEmail=$PublisherEmail'"
 ) -join " "

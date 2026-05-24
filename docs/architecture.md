@@ -96,7 +96,8 @@ Self-update mechanism:
 
 ## Build & release
 
-- Version is read from `.version` at runtime and compile time
-- ldflags inject `Commit`, `PublisherName`, `PublisherEmail` into the binary
+- Version is injected via ldflags (`Version`) at build time, falling back to `.version` file
+- ldflags inject `Commit`, `Version`, `PublisherName`, `PublisherEmail` into the binary
+- Quiet mode (`cfg.Quiet`) is propagated to `core.SetQuietMode()` which skips animated spinners and progress bars, using direct function calls with panic recovery instead
 - Cross-platform scripts build 6 binaries: `{os}-{arch}` for windows/linux/darwin × amd64/arm64
 - Installer scripts download from `https://github.com/rkriad585/neocut/releases/download/{version}/{binary}`

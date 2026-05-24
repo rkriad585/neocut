@@ -132,6 +132,22 @@ neocut completion fish | source
 neocut completion powershell | Out-String | Invoke-Expression
 ```
 
+## Processing stats
+
+After a successful run, neocut displays a summary:
+
+```
+    Segments:     42
+    Input:        45m 30s
+    Output:       38m 12s
+    Removed:      7m 18s (16.0%)
+```
+
+- **Segments**: number of non-silent chunks found
+- **Input**: original audio duration
+- **Output**: duration after silence removal
+- **Removed**: total silence cut, with percentage of original
+
 ## Output
 
 - All processed files go to `~/Downloads/neocut/`

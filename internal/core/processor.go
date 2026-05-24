@@ -117,6 +117,21 @@ func exportWithProgress(exporter *godub.Exporter, segment *godub.AudioSegment) e
 	return err
 }
 
+func fmtDuration(d time.Duration) string {
+	d = d.Round(time.Millisecond)
+	h := int(d.Hours())
+	m := int(d.Minutes()) % 60
+	s := int(d.Seconds()) % 60
+	totalSec := float64(d) / float64(time.Second)
+	if h > 0 {
+		return fmt.Sprintf("%dh %dm %ds", h, m, s)
+	}
+	if m > 0 {
+		return fmt.Sprintf("%dm %ds", m, s)
+	}
+	return fmt.Sprintf("%.1fs", totalSec)
+}
+
 func Process(cfg *config.Config) error {
 	SetQuietMode(cfg.Quiet)
 
@@ -152,7 +167,8 @@ func Process(cfg *config.Config) error {
 	if len(chunks) == 0 {
 		return fmt.Errorf("no audio remaining after silence removal")
 	}
-	fmt.Printf("    Found %d non-silent segment(s)\n", len(chunks))
+
+	inputDur := segment.Duration()
 
 	var combined *godub.AudioSegment
 	if err := step("Recombining audio chunks", func() error {
@@ -165,6 +181,19 @@ func Process(cfg *config.Config) error {
 		return combineErr
 	}); err != nil {
 		return err
+	}
+
+	outputDur := combined.Duration()
+	silenceRemoved := inputDur - outputDur
+	pct := float64(0)
+	if inputDur > 0 {
+		pct = float64(silenceRemoved.Milliseconds()) / float64(inputDur.Milliseconds()) * 100
+	}
+	if !isQuiet() {
+		fmt.Printf("    Segments:     %d\n", len(chunks))
+		fmt.Printf("    Input:        %s\n", fmtDuration(inputDur))
+		fmt.Printf("    Output:       %s\n", fmtDuration(outputDur))
+		fmt.Printf("    Removed:      %s (%.1f%%)\n", fmtDuration(silenceRemoved), pct)
 	}
 
 	outputDir := config.GetOutputDir(cfg)

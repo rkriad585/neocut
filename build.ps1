@@ -26,6 +26,9 @@ $Platforms = @(
     @{ OS = "darwin";  Arch = "arm64"; Ext = "" }
 )
 
+Write-Host "  Generating embedded assets..."
+& go generate ./internal/config/ 2>&1
+
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 
 Write-Host "╭──────────────── neocut build ────────────────╮"

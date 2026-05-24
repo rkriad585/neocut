@@ -66,5 +66,13 @@ neocut/
 
 ## Version
 
-- Injected via ldflags at build time (`Version`), falling back to `.version` file read for development
-- Also injected: `Commit` (git hash), `PublisherName`, `PublisherEmail`
+- Embedded into the binary via `//go:embed` — always available, from any directory
+- Can be overridden via ldflags at build time (`Version`)
+- Also injected/embedded: `Commit` (git hash), `PublisherName`, `PublisherEmail`
+
+## Processing stats
+
+After processing, neocut shows a summary with:
+- Input duration
+- Output duration
+- Silence removed (absolute and percentage)

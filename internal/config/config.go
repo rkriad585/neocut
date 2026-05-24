@@ -1,11 +1,17 @@
+//go:generate go run gen.go
+
 package config
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+//go:embed version.txt
+var embeddedVersion string
 
 var (
 	Commit         = "unknown"
@@ -29,11 +35,14 @@ func ReadVersion() string {
 	if Version != "unknown" && Version != "" {
 		return Version
 	}
-	data, err := os.ReadFile(".version")
-	if err != nil {
-		return "unknown"
+	if embeddedVersion != "" {
+		return strings.TrimSpace(embeddedVersion)
 	}
-	return strings.TrimSpace(string(data))
+	data, err := os.ReadFile(".version")
+	if err == nil {
+		return strings.TrimSpace(string(data))
+	}
+	return "unknown"
 }
 
 func PrintBanner(version, commit string) {

@@ -24,6 +24,9 @@ PLATFORMS=(
     "darwin/arm64/"
 )
 
+echo "  Generating embedded assets..."
+go generate ./internal/config/ 2>&1
+
 mkdir -p "$OUTPUT_DIR"
 
 echo "╭──────────────── neocut build ────────────────╮"

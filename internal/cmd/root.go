@@ -9,6 +9,7 @@ import (
 	"neocut/internal/config"
 	"neocut/internal/core"
 	"neocut/internal/tui"
+	"neocut/internal/update"
 )
 
 var (
@@ -33,6 +34,7 @@ Project config is stored in ~/.config/neostore/neocut/`,
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 }
@@ -49,6 +51,26 @@ func init() {
 	rootCmd.Flags().Float64VarP(&cfg.SilenceThresh, "silence-thresh", "s", -16.0, "Silence threshold in dBFS")
 	rootCmd.Flags().IntVarP(&cfg.KeepSilence, "keep-silence", "k", 100, "Silence to keep at boundaries in ms")
 	rootCmd.Flags().IntVarP(&cfg.SeekStep, "seek-step", "e", 1, "Seek step in ms")
+
+	rootCmd.AddCommand(selfUpdateCmd)
+}
+
+var selfUpdateCmd = &cobra.Command{
+	Use:   "self-update",
+	Short: "Update neocut to the latest version",
+	Long: `Fetch the latest version from GitHub and replace the current binary.
+
+The version is fetched from:
+  https://raw.githubusercontent.com/rkriad585/neocut/main/.version
+
+If a newer version is found, the appropriate binary is downloaded
+and the current executable is replaced.`,
+	SilenceUsage:  true,
+	SilenceErrors: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		version := config.ReadVersion()
+		return update.Run(version)
+	},
 }
 
 func run(cmd *cobra.Command, args []string) error {

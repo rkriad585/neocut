@@ -7,7 +7,11 @@ import (
 	"strings"
 )
 
-var Commit = "unknown"
+var (
+	Commit         = "unknown"
+	PublisherName  = "unknown"
+	PublisherEmail = "unknown"
+)
 
 type Config struct {
 	InputFile     string

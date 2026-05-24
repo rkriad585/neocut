@@ -6,3 +6,4 @@ neocut.exe
 .vscode/
 .idea/
 test*.mp3
+/bin/

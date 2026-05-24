@@ -1,0 +1,7 @@
+neocut
+neocut.exe
+*.exe
+*.test
+*.out
+.vscode/
+.idea/

@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	cfg     config.Config
-	tuiMode bool
+	cfg           config.Config
+	tuiMode       bool
+	selfUninstall bool
 )
 
 var rootCmd = &cobra.Command{
@@ -52,6 +53,8 @@ func init() {
 	rootCmd.Flags().IntVarP(&cfg.KeepSilence, "keep-silence", "k", 100, "Silence to keep at boundaries in ms")
 	rootCmd.Flags().IntVarP(&cfg.SeekStep, "seek-step", "e", 1, "Seek step in ms")
 
+	rootCmd.Flags().BoolVar(&selfUninstall, "selfuninstall", false, "Remove neocut and its config directory")
+
 	rootCmd.AddCommand(selfUpdateCmd)
 }
 
@@ -74,6 +77,10 @@ and the current executable is replaced.`,
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	if selfUninstall {
+		os.Exit(runSelfUninstall())
+	}
+
 	version := config.ReadVersion()
 	config.PrintBanner(version, config.Commit)
 	config.EnsureConfigDir()

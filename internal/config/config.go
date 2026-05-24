@@ -50,12 +50,19 @@ func GetOutputDir() string {
 	return filepath.Join(home, "Downloads", "neocut")
 }
 
-func EnsureConfigDir() {
+func ConfigDir() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
+		return ""
+	}
+	return filepath.Join(home, ".config", "neostore", "neocut")
+}
+
+func EnsureConfigDir() {
+	configDir := ConfigDir()
+	if configDir == "" {
 		return
 	}
-	configDir := filepath.Join(home, ".config", "neostore", "neocut")
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		fmt.Printf("Warning: could not create config dir: %v\n", err)
 	}

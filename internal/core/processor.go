@@ -11,6 +11,7 @@ import (
 	"github.com/Vernacular-ai/godub"
 
 	"neocut/internal/config"
+	"neocut/internal/ffmpeg"
 )
 
 func step(label string, fn func() error) error {
@@ -82,6 +83,10 @@ func exportWithProgress(exporter *godub.Exporter, segment *godub.AudioSegment) e
 }
 
 func Process(cfg *config.Config) error {
+	if err := ffmpeg.Ensure(); err != nil {
+		return fmt.Errorf("ffmpeg setup failed: %w", err)
+	}
+
 	var segment *godub.AudioSegment
 
 	if err := step("Loading audio", func() error {

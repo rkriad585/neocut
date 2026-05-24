@@ -5,3 +5,4 @@ neocut.exe
 *.out
 .vscode/
 .idea/
+test*.mp3

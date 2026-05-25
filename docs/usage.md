@@ -17,6 +17,9 @@ neocut [command]
 | `--tui` | `-t` | bool | `false` | Launch interactive TUI form |
 | `--config` | `-c` | bool | `false` | Edit project config interactively |
 | `--quiet` | `-q` | bool | `false` | Suppress banner, spinners, and progress |
+| `--format` | `-f` | string | `mp3` | Output codec: `mp3`, `wav`, `flac` |
+| `--bitrate` | `-b` | int | `0` | Output bitrate in kbps (e.g. `192`, `320`); 0 = codec default |
+| `--dry-run` | | bool | `false` | Preview stats (segments, durations, removal %) without exporting |
 | `--min-silence-len` | `-m` | int | `1000` | Minimum silence length in milliseconds |
 | `--silence-thresh` | `-s` | float | `-16` | Silence threshold in dBFS |
 | `--keep-silence` | `-k` | int | `100` | Silence to keep at boundaries in ms |
@@ -93,6 +96,38 @@ neocut -i vocals.mp3 -e 0.5
 
 Lowers the seek step to 0.5ms for more precise silence boundaries (slower processing).
 
+### FLAC output with custom bitrate
+
+```bash
+neocut -i recording.mp3 --format flac --bitrate 320
+```
+
+Exports to `~/Downloads/neocut/recording_no_silence.flac` at 320 kbps (FLAC supports lossless at 1411 kbps by default).
+
+### WAV output
+
+```bash
+neocut -i lecture.mp3 --format wav
+```
+
+Exports to `~/Downloads/neocut/lecture_no_silence.wav`.
+
+### Dry run
+
+```bash
+neocut -i podcast.mp3 --dry-run
+```
+
+Processes the file and shows stats (segments, input/output duration, removal %) but does **not** create an output file.
+
+### Format + bitrate + quiet (scripting)
+
+```bash
+neocut -i input.mp3 -f wav -b 192 -q
+```
+
+Quiet mode: suppresses banner, spinners, and progress. Only prints the output path.
+
 ### Interactive TUI mode
 
 ```bash
@@ -165,8 +200,9 @@ After a successful run, neocut displays a summary:
 ## Output
 
 - All processed files go to `~/Downloads/neocut/`
-- Default naming: `{input_filename_without_ext}_no_silence.mp3`
-- Output format is always MP3
+- Default naming: `{input_filename_without_ext}_no_silence.{ext}`
+- Output format: MP3 (default), WAV, or FLAC — set via `--format`
+- Output bitrate configurable via `--bitrate` (applies to MP3, FLAC)
 - If the output directory doesn't exist, it is created automatically
 
 ## Processing pipeline

@@ -10,6 +10,9 @@ All configuration is passed via CLI flags. There is no persistent configuration 
 | `-o / --output` | auto | Output filename; defaults to `{input}_no_silence.mp3` |
 | `-d / --output-dir` | `~/Downloads/neocut/` | Custom output directory |
 | `-q / --quiet` | `false` | Suppress banner, spinners, and progress |
+| `-f / --format` | `mp3` | Output codec: `mp3`, `wav`, `flac` |
+| `-b / --bitrate` | `0` | Output bitrate in kbps (`0` = codec default) |
+| `--dry-run` | `false` | Preview stats without exporting |
 | `-m / --min-silence-len` | `1000` ms | Minimum duration of silence to detect |
 | `-s / --silence-thresh` | `-16` dBFS | Volume threshold; segments below this are considered silence |
 | `-k / --keep-silence` | `100` ms | Silence to preserve at the boundaries of kept segments |

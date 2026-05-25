@@ -10,7 +10,7 @@ Given an MP3 file with pauses, gaps, or silent sections, neocut:
 2. **Detects silence** using configurable threshold, minimum length, and seek precision
 3. **Splits** on silence boundaries, discarding the silent chunks
 4. **Recombines** the remaining audio segments into one continuous file
-5. **Exports** the result as MP3 to `~/Downloads/neocut/`
+5. **Exports** the result as MP3 (or WAV/FLAC via `--format`) to `~/Downloads/neocut/`
 
 Every step shows an animated spinner or progress bar. Panics during silence detection are recovered gracefully.
 

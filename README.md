@@ -11,6 +11,8 @@
 - Configurable silence threshold, minimum length, and keep-silence margin
 - Animated progress spinner and progress bars during processing
 - Interactive TUI mode via `--tui` (powered by [huh](https://github.com/charmbracelet/huh))
+- Output in MP3, WAV, or FLAC via `--format` with configurable `--bitrate`
+- Preview stats without exporting via `--dry-run` (iterate quickly)
 - Auto-downloads ffmpeg when missing (Windows, Linux, macOS)
 - `self-update` command to upgrade to the latest release
 - `--selfuninstall` flag to fully remove neocut from the system
@@ -126,6 +128,15 @@ neocut -i batch_input.mp3 -q
 # Use a preset from the config file (aggressive, gentle, or speech)
 neocut -i podcast.mp3 --preset speech
 
+# WAV output — for further editing
+neocut -i recording.mp3 -f wav
+
+# Dry run — see stats without writing a file
+neocut -i podcast.mp3 --dry-run
+
+# FLAC with custom bitrate
+neocut -i master.mp3 -f flac -b 320
+
 # Interactive TUI mode — fill in options visually
 neocut --tui
 ```
@@ -155,7 +166,7 @@ neocut processes audio in four steps:
  └──────┬──────┘
         ▼
  ┌─────────────┐
- │  4. Export  │  Writes the result as MP3 to output-dir
+ │  4. Export  │  Writes the result (MP3/WAV/FLAC) to output-dir
  └─────────────┘
 ```
 
@@ -173,7 +184,8 @@ After processing, neocut shows a summary:
 ## Output
 
 - Processed files are saved to `~/Downloads/neocut/`
-- Default output name: `{input_name}_no_silence.mp3`
+- Default output name: `{input_name}_no_silence.{ext}` (mp3, wav, flac)
+- Default format: MP3 (set via `--format`)
 - Config directory: `~/.config/neostore/neocut/`
 - ffmpeg binary: `~/.config/neostore/neocut/bin/`
 

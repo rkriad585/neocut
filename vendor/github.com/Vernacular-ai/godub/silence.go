@@ -180,7 +180,7 @@ func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, 
 
 	normAudio, _ := seg.derive(seg.RawData())
 
-	normAudio = matchTargetAmp(seg, -20.0)
+	normAudio = matchTargetAmp(seg, -10.0)
 
 	notSilenceRanges := detectNonsilent(normAudio, minSilenceLen, silenceThresh, seekStep)
 

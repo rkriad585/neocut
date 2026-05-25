@@ -31,6 +31,9 @@ type Config struct {
 	Quiet         bool
 	Preset        string
 	Presets       []PresetEntry
+	Format        string
+	Bitrate       int
+	DryRun        bool
 }
 
 func ReadVersion() string {

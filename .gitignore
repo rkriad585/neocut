@@ -1,6 +1,7 @@
 neocut
 neocut.exe
 *.exe
+*.exe~
 *.test
 *.out
 .vscode/

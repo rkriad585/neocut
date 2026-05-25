@@ -80,6 +80,9 @@ neocut -i input.mp3 [-o output.mp3] [flags]
 | `--config` | `-c` | `false` | Edit project config interactively (huh TUI) |
 | `--quiet` | `-q` | `false` | Suppress banner, spinners, and progress |
 | `--preset` | | `""` | Load preset from config (aggressive, gentle, speech) |
+| `--format` | `-f` | `mp3` | Output format: mp3, wav, flac |
+| `--bitrate` | `-b` | `0` | Output bitrate in kbps (e.g. 192, 320) |
+| `--dry-run` | | `false` | Preview stats without exporting |
 | `--min-silence-len` | `-m` | `1000` | Minimum silence length in ms |
 | `--silence-thresh` | `-s` | `-16` | Silence threshold in dBFS |
 | `--keep-silence` | `-k` | `100` | Silence to keep at boundaries in ms |

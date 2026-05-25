@@ -201,19 +201,35 @@ func Process(cfg *config.Config) error {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
+	format := cfg.Format
+	if format == "" {
+		format = "mp3"
+	}
+
 	outputName := cfg.OutputName
 	if outputName == "" {
 		base := filepath.Base(cfg.InputFile)
 		ext := filepath.Ext(base)
-		outputName = strings.TrimSuffix(base, ext) + "_no_silence.mp3"
-	}
-	if !strings.HasSuffix(strings.ToLower(outputName), ".mp3") {
-		outputName += ".mp3"
+		outputName = strings.TrimSuffix(base, ext) + "_no_silence." + format
+	} else {
+		outputName = strings.TrimSuffix(outputName, filepath.Ext(outputName)) + "." + format
 	}
 	outputPath := filepath.Join(outputDir, outputName)
 
+	if cfg.DryRun {
+		config.AppendHistory(cfg)
+		if !isQuiet() {
+			fmt.Printf("  \u2713 Dry-run complete — no file written.\n")
+			fmt.Println()
+		}
+		return nil
+	}
+
 	exporter := godub.NewExporter(outputPath).
-		WithDstFormat("mp3")
+		WithDstFormat(format)
+	if cfg.Bitrate > 0 {
+		exporter = exporter.WithBitRate(cfg.Bitrate * 1000)
+	}
 
 	if err := exportWithProgress(exporter, combined); err != nil {
 		return fmt.Errorf("export failed: %w", err)
@@ -224,6 +240,9 @@ func Process(cfg *config.Config) error {
 	if !isQuiet() {
 		fmt.Printf("  \u2713 Exported to %s\n", outputPath)
 		fmt.Println()
+		if cfg.Bitrate > 0 {
+			fmt.Printf("  Format: %s @ %dkbps\n", strings.ToUpper(format), cfg.Bitrate)
+		}
 		fmt.Printf("  Done! (OS: %s/%s)\n", runtime.GOOS, runtime.GOARCH)
 		fmt.Println()
 	} else {

@@ -134,8 +134,8 @@ rename "%s" "%s" >nul 2>&1
 if exist "%s" (
   start "" "%s"
 )
-del /f /q "%%self%" >nul 2>&1
-`, exePath, exePath, tmpPath, exePath, exePath, exePath)
+del /f /q "%%self%%" >nul 2>&1
+`, exePath, exePath, exePath, tmpPath, exePath, exePath, exePath)
 
 	scriptPath := exePath + ".update.bat"
 	if err := os.WriteFile(scriptPath, []byte(script), 0755); err != nil {
@@ -161,9 +161,6 @@ func filepathEval(path string) (string, error) {
 		resolved, err := os.Readlink(path)
 		if err != nil {
 			return "", err
-		}
-		if !strings.Contains(resolved, "/") && !strings.Contains(resolved, "\\") {
-			resolved = resolved
 		}
 		return resolved, nil
 	}

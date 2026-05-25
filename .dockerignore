@@ -1,0 +1,13 @@
+.git/
+.gitignore
+.version
+bin/
+build.ps1
+build.sh
+docs/
+installer.ps1
+installer.sh
+vendor/
+test.mp3
+*.exe
+.DS_Store

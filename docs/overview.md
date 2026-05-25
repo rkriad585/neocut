@@ -62,7 +62,7 @@ neocut/
 ├── build.sh                     # Unix cross-platform build script
 ├── installer.ps1                # Windows one-liner installer
 ├── installer.sh                 # Unix one-liner installer
-├── .version                     # Current version (v1.0.1)
+├── .version                     # Current version (v1.0.2)
 ├── go.mod / go.sum              # Go module
 └── README.md
 ```

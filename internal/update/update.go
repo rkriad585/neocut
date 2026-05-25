@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"runtime"
 	"strings"
 	"sync/atomic"
@@ -122,34 +121,19 @@ func replaceUnix(exePath, tmpPath string) error {
 }
 
 func replaceWindows(exePath, tmpPath string) error {
-	script := fmt.Sprintf(`@echo off
-setlocal
-set "self=%%~f0"
-:wait
-ping -n 2 127.0.0.1 >nul 2>&1
-if exist "%s" (
-  del /f /q "%s" >nul 2>&1
-  if exist "%s" goto wait
-)
-rename "%s" "%s" >nul 2>&1
-if exist "%s" (
-  start "" "%s"
-)
-del /f /q "%%self%%" >nul 2>&1
-`, exePath, exePath, exePath, tmpPath, exePath, exePath, exePath)
+	oldPath := exePath + ".old"
+	os.Remove(oldPath)
 
-	scriptPath := exePath + ".update.bat"
-	if err := os.WriteFile(scriptPath, []byte(script), 0755); err != nil {
-		return err
+	if err := os.Rename(exePath, oldPath); err != nil {
+		return fmt.Errorf("failed to rename current executable: %w", err)
 	}
 
-	cmd := exec.Command("cmd", "/c", scriptPath)
-	if err := cmd.Start(); err != nil {
-		os.Remove(scriptPath)
-		return fmt.Errorf("failed to start update script: %w", err)
+	if err := os.Rename(tmpPath, exePath); err != nil {
+		os.Rename(oldPath, exePath)
+		return fmt.Errorf("failed to install new executable: %w", err)
 	}
 
-	fmt.Println("  Update will complete after exit.")
+	fmt.Println("  Restart the application to use the new version.")
 	return nil
 }
 

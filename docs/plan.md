@@ -92,6 +92,19 @@ First stable release. All known bugs from v0.2.x are resolved:
 
 ---
 
+## v1.0.2 — Fix self-update for real
+
+### ✅ 10. Replace batch script with direct rename
+
+The batch script approach was fundamentally unreliable:
+- Format-string bugs caused args to map to wrong placeholders
+- Wait-loop checking was incorrect (infinite loop)
+- rename source/dest were swapped
+
+Replaced with the proven approach from neodlp: **rename running exe → .old**, then **rename temp → exe**. Windows allows renaming a running executable (just not deleting it). No batch script needed.
+
+---
+
 ## Future
 
 ### 10. `--save` flag (persist current params)

@@ -7,7 +7,6 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"sync/atomic"
 	"time"
 )
 
@@ -16,11 +15,9 @@ const (
 	project    = "neocut"
 )
 
-var httpClient = &http.Client{Timeout: 10 * time.Second}
-
 func LatestVersion() (string, error) {
 	url := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/main/.version", gitHubUser, project)
-	resp, err := httpClient.Get(url)
+	resp, err := http.Get(url)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch version: %w", err)
 	}
@@ -61,18 +58,17 @@ func Run(currentVersion string) error {
 
 	if latest == currentVersion {
 		fmt.Println()
-		fmt.Println("  Already up to date.")
+		fmt.Println("  ✓ Already up to date!")
 		fmt.Println()
 		return nil
 	}
 
 	fmt.Println()
-	fmt.Println("  Update available! Downloading...")
-	fmt.Println()
+	fmt.Printf("  Updating to %s...\n", latest)
 
 	exePath, err := os.Executable()
 	if err != nil {
-		return fmt.Errorf("cannot determine executable path: %w", err)
+		return fmt.Errorf("failed to locate running executable: %w", err)
 	}
 
 	exePath, err = filepathEval(exePath)
@@ -81,59 +77,70 @@ func Run(currentVersion string) error {
 	}
 
 	url := DownloadURL(latest)
-	tmpPath := exePath + ".update.tmp"
+	tmpPath := exePath + ".tmp"
+	os.Remove(tmpPath)
 
-	if err := downloadWithProgress(url, tmpPath); err != nil {
-		os.Remove(tmpPath)
+	fmt.Printf("  Downloading from: %s\n", url)
+
+	client := &http.Client{Timeout: 5 * time.Minute}
+	resp, err := client.Get(url)
+	if err != nil {
 		return fmt.Errorf("download failed: %w", err)
 	}
+	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("failed to download release binary: server returned %s", resp.Status)
+	}
+
+	tmpFile, err := os.OpenFile(tmpPath, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create temporary file: %w", err)
+	}
+
+	cleanup := true
+	defer func() {
+		if cleanup {
+			tmpFile.Close()
+			os.Remove(tmpPath)
+		}
+	}()
+
+	progress := &WriteCounter{}
+	_, err = io.Copy(tmpFile, io.TeeReader(resp.Body, progress))
+	if err != nil {
+		return fmt.Errorf("failed to write binary content: %w", err)
+	}
+	tmpFile.Close()
 	fmt.Println()
-	fmt.Println("  Installing update...")
 
-	if err := replaceBinary(exePath, tmpPath); err != nil {
-		os.Remove(tmpPath)
-		return fmt.Errorf("installation failed: %w", err)
-	}
-
-	fmt.Println()
-	fmt.Printf("  Updated to %s successfully.\n", latest)
-	fmt.Println()
-	return nil
-}
-
-func replaceBinary(exePath, tmpPath string) error {
-	if runtime.GOOS == "windows" {
-		return replaceWindows(exePath, tmpPath)
-	}
-	return replaceUnix(exePath, tmpPath)
-}
-
-func replaceUnix(exePath, tmpPath string) error {
-	if err := os.Chmod(tmpPath, 0755); err != nil {
-		return err
-	}
-	if err := os.Rename(tmpPath, exePath); err != nil {
-		return err
-	}
-	fmt.Println("  Restart the application to use the new version.")
-	return nil
-}
-
-func replaceWindows(exePath, tmpPath string) error {
 	oldPath := exePath + ".old"
 	os.Remove(oldPath)
 
-	if err := os.Rename(exePath, oldPath); err != nil {
-		return fmt.Errorf("failed to rename current executable: %w", err)
+	if runtime.GOOS == "windows" {
+		err = os.Rename(exePath, oldPath)
+		if err != nil {
+			return fmt.Errorf("failed to rename running executable: %w", err)
+		}
+		err = os.Rename(tmpPath, exePath)
+		if err != nil {
+			os.Rename(oldPath, exePath)
+			return fmt.Errorf("failed to install new executable: %w", err)
+		}
+		cleanup = false
+		fmt.Printf("  ✓ Success! neocut has been updated to %s.\n", latest)
+		fmt.Println("  Note: You can safely delete the old executable (neocut.exe.old) after closing this session.")
+	} else {
+		err = os.Rename(tmpPath, exePath)
+		if err != nil {
+			return fmt.Errorf("failed to install new executable: %w", err)
+		}
+		cleanup = false
+		os.Chmod(exePath, 0755)
+		fmt.Printf("  ✓ Success! neocut has been updated to %s.\n", latest)
 	}
 
-	if err := os.Rename(tmpPath, exePath); err != nil {
-		os.Rename(oldPath, exePath)
-		return fmt.Errorf("failed to install new executable: %w", err)
-	}
-
-	fmt.Println("  Restart the application to use the new version.")
+	fmt.Println()
 	return nil
 }
 
@@ -152,93 +159,13 @@ func filepathEval(path string) (string, error) {
 	return path, nil
 }
 
-func downloadWithProgress(url, dest string) error {
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
+type WriteCounter struct {
+	Total uint64
+}
 
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("HTTP %d", resp.StatusCode)
-	}
-
-	f, err := os.Create(dest)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	total := resp.ContentLength
-	var written atomic.Int64
-
-	done := make(chan struct{})
-	go func() {
-		blocks := []string{" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"}
-		width := 30
-		i := 0
-		for {
-			select {
-			case <-done:
-				bar := strings.Repeat("█", width)
-				fmt.Printf("\r  Downloading [%s] 100%%", bar)
-				return
-			default:
-				w := written.Load()
-				if total > 0 {
-					pct := float64(w) / float64(total)
-					full := int(pct * float64(width))
-					part := int((pct*float64(width) - float64(full)) * 8)
-					bar := strings.Repeat("█", full)
-					if part > 0 && full < width {
-						bar += blocks[part]
-						full++
-					}
-					bar += strings.Repeat(" ", width-full)
-					fmt.Printf("\r  Downloading [%s] %3d%%", bar, int(pct*100))
-				} else {
-					pos := i % (width * 8)
-					full := pos / 8
-					part := pos % 8
-					bar := strings.Repeat("█", full)
-					if part > 0 {
-						bar += blocks[part]
-					}
-					bar += strings.Repeat(" ", width-full)
-					fmt.Printf("\r  Downloading [%s]", bar)
-				}
-				i++
-				time.Sleep(40 * time.Millisecond)
-			}
-		}
-	}()
-
-	buf := make([]byte, 32*1024)
-	for {
-		n, readErr := resp.Body.Read(buf)
-		if n > 0 {
-			wn, writeErr := f.Write(buf[:n])
-			if writeErr != nil {
-				close(done)
-				time.Sleep(60 * time.Millisecond)
-				fmt.Println()
-				return writeErr
-			}
-			written.Add(int64(wn))
-		}
-		if readErr == io.EOF {
-			break
-		}
-		if readErr != nil {
-			close(done)
-			time.Sleep(60 * time.Millisecond)
-			fmt.Println()
-			return readErr
-		}
-	}
-
-	close(done)
-	time.Sleep(60 * time.Millisecond)
-	fmt.Println()
-	return nil
+func (wc *WriteCounter) Write(p []byte) (int, error) {
+	n := len(p)
+	wc.Total += uint64(n)
+	fmt.Printf("\r  Downloaded: %.2f MB", float64(wc.Total)/1024/1024)
+	return n, nil
 }

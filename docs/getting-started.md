@@ -35,7 +35,24 @@ cd neocut
 go build -ldflags "-X neocut/internal/config.Commit=$(git rev-parse --short HEAD) -X neocut/internal/config.Version=$(cat .version) -X neocut/internal/config.PublisherName=$(whoami) -X neocut/internal/config.PublisherEmail=$(whoami)@example.com" -o neocut ./cmd/neocut/
 ```
 
-### Option 3: Cross-platform build script
+### Option 3: Make (Unix)
+
+```sh
+make            # build for current platform
+make build-all  # cross-compile all 6 platforms
+make test       # run all tests
+make clean      # remove build artifacts
+```
+
+### Option 4: Docker
+
+```sh
+make docker          # build image using Make
+docker build -t neocut .  # or build manually
+docker run --rm -v "$(pwd):/workspace" neocut -i /workspace/input.mp3
+```
+
+### Option 5: Cross-platform build script
 
 **Windows:**
 ```powershell

@@ -103,6 +103,18 @@ The batch script approach was fundamentally unreliable:
 
 Replaced with the proven approach from neodlp: **rename running exe → .old**, then **rename temp → exe**. Windows allows renaming a running executable (just not deleting it). No batch script needed.
 
+### ✅ 11. Open-source files
+
+Added standard open-source repository files:
+- `LICENSE` — MIT License
+- `CODE_OF_CONDUCT.md` — Contributor Covenant v2.1
+- `CONTRIBUTING.md` — contribution guidelines
+- `SECURITY.md` — security vulnerability reporting policy
+- `Makefile` — build, test, docker, cross-compile targets
+- `Dockerfile` — multi-stage Docker build (golang:1.23-alpine → alpine:3.20)
+- `.dockerignore` — Docker context exclusions
+- `CMakeLists.txt` — IDE/toolchain integration
+
 ---
 
 ## Future
@@ -128,5 +140,7 @@ List available presets and history from config.jsonl.
 | Fix self-update | medium | v0.2.4 | ✅ Done |
 | Unit tests | medium | v0.2.4 | ✅ Done |
 | Stable release | low | v1.0.1 | ✅ Done |
+| Replace batch script (real fix) | medium | v1.0.2 | ✅ Done |
+| Open-source files | low | v1.0.2 | ✅ Done |
 | `--save` | medium | — | ❌ Pending |
 | `--preset list` / `list` cmd | low | — | ❌ Pending |

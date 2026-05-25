@@ -86,12 +86,12 @@ Download sources:
 ### `internal/update`
 
 Self-update mechanism:
-- `LatestVersion()` — HTTP GET to `raw.githubusercontent.com/rkriad585/neocut/main/.version` (10s timeout)
+- `LatestVersion()` — HTTP GET to `raw.githubusercontent.com/rkriad585/neocut/main/.version`
 - `DownloadURL()` — builds the release binary URL from `runtime.GOOS`/`runtime.GOARCH`
-- `Run()` — orchestrates version check → download with progress → binary replacement
-- `replaceBinary()` — platform-specific replacement:
-  - Unix: `os.Rename(tmp, exePath)` (inode stays alive)
-  - Windows: deferred `.bat` script that waits for process exit, deletes old binary, renames new binary into place, and restarts
+- `Run()` — orchestrates version check → download with progress (`io.TeeReader` + `WriteCounter`) → binary replacement
+- Cross-platform rename with deferred cleanup:
+  - **Windows:** `os.Rename(exe, exe.old)` → `os.Rename(tmp, exe)` — Windows permits renaming a running executable. Restores `.old` on failure.
+  - **Unix:** `os.Rename(tmp, exe)` with `os.Chmod(0755)`
 
 ## Platform support
 
@@ -100,9 +100,10 @@ Self-update mechanism:
 | CLI flags | ✓ | ✓ | ✓ |
 | TUI mode | ✓ | ✓ | ✓ |
 | ffmpeg auto-download | ✓ | ✓ | ✓ |
-| self-update | ✓ (bat) | ✓ (rename) | ✓ (rename) |
-| --selfuninstall | ✓ (bat) | ✓ (RemoveAll) | ✓ (RemoveAll) |
-| Build script | build.ps1 | build.sh | build.sh |
+| self-update | ✓ (rename) | ✓ (rename) | ✓ (rename) |
+| --selfuninstall | ✓ (RemoveAll) | ✓ (RemoveAll) | ✓ (RemoveAll) |
+| Build script | build.ps1 / Makefile | build.sh / Makefile | build.sh / Makefile |
+| Docker | — | ✓ (Dockerfile) | ✓ (Dockerfile) |
 | Installer | installer.ps1 | installer.sh | installer.sh |
 
 ## Testing
@@ -116,7 +117,7 @@ Each internal package has dedicated unit tests in `*_test.go` files:
 | core | `processor_test.go` | fmtDuration (21 sub-cases), SetQuietMode thread safety |
 | ffmpeg | `ffmpeg_test.go` | BinDir, pathContains, addToPATH, downloadURL, which shim |
 | ffmpeg | `download_test.go` | extractZip, downloadWithProgress (HTTP test server) |
-| update | `update_test.go` | DownloadURL, filepathEval, replaceUnix, downloadWithProgress |
+| update | `update_test.go` | DownloadURL, filepathEval |
 | cmd | `root_test.go` | Execute, flag registration, short-form uniqueness |
 
 Run all tests with:

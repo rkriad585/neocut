@@ -56,6 +56,8 @@ On Windows, a running executable cannot be deleted. neocut handles this by:
 1. Creating a batch script (`%TEMP%\neocut-uninstall.bat`)
 2. The script waits 1 second, then deletes the binary
 
+> This is the only remaining batch script in neocut. The `self-update` feature previously used a batch script but was replaced in v1.0.2 with a direct `os.Rename` approach.
+
 If the batch script fails to run:
 - Manually delete `%USERPROFILE%\.config\neostore\neocut\`
 - Manually delete the binary
@@ -76,6 +78,8 @@ This was a bug in v0.2.1–v1.0.1 where the Windows update script:
 3. Renamed the exe to itself (no-op) instead of renaming the temp file
 
 **Fix:** Upgrade to v1.0.2+ which replaces the fragile batch script with a direct rename (rename running exe → `.old`, then rename temp → exe). Windows allows renaming a running executable.
+
+After a successful update, a `neocut.exe.old` file remains in the install directory — you can safely delete it.
 ```powershell
 irm https://raw.githubusercontent.com/rkriad585/neocut/main/installer.ps1 | iex
 ```

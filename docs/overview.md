@@ -58,12 +58,20 @@ neocut/
 │       └── update_test.go       # DownloadURL, filepathEval, replaceUnix tests
 ├── docs/                        # Documentation
 ├── vendor/                      # Vendored dependencies (godub patched in-tree)
+├── Makefile                     # Build automation (build, test, docker, etc.)
+├── Dockerfile                   # Multi-stage Docker build
+├── .dockerignore                # Docker context exclusions
+├── CMakeLists.txt               # IDE/toolchain integration
 ├── build.ps1                    # Windows cross-platform build script
 ├── build.sh                     # Unix cross-platform build script
 ├── installer.ps1                # Windows one-liner installer
 ├── installer.sh                 # Unix one-liner installer
 ├── .version                     # Current version (v1.0.2)
 ├── go.mod / go.sum              # Go module
+├── LICENSE                      # MIT License
+├── CODE_OF_CONDUCT.md           # Contributor Covenant
+├── CONTRIBUTING.md              # Contribution guidelines
+├── SECURITY.md                  # Security policy
 └── README.md
 ```
 

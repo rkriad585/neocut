@@ -2,6 +2,8 @@
 
 > Remove silence from MP3 audio files — automatically detect, split, and recombine.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 > [!NOTE]
 > Type: CLI Tool | Language: Go | Status: active
 
@@ -47,7 +49,12 @@ curl -fsSL https://raw.githubusercontent.com/rkriad585/neocut/main/installer.sh 
 ```bash
 git clone https://github.com/rkriad585/neocut.git
 cd neocut
-go build -ldflags "-X neocut/internal/config.Commit=$(git rev-parse --short HEAD) -X neocut/internal/config.Version=$(cat .version)" -o neocut ./cmd/neocut/
+
+# Using Make (Linux/macOS)
+make
+
+# Or directly with Go
+go build -ldflags "-X neocut/internal/config.Commit=$(git rev-parse --short HEAD)" -o neocut ./cmd/neocut/
 ```
 
 ### Cross-platform build
@@ -58,12 +65,28 @@ go build -ldflags "-X neocut/internal/config.Commit=$(git rev-parse --short HEAD
 
 # Unix
 chmod +x build.sh && ./build.sh
+
+# Or using Make
+make build-all
 ```
 
 Outputs 6 binaries to `bin/`:
 - `neocut-windows-amd64.exe`, `neocut-windows-arm64.exe`
 - `neocut-linux-amd64`, `neocut-linux-arm64`
 - `neocut-darwin-amd64`, `neocut-darwin-arm64`
+
+### Docker
+
+```bash
+# Build the image
+make docker
+
+# Or build manually
+docker build -t neocut .
+
+# Run
+docker run --rm -v "$(pwd):/workspace" neocut -i /workspace/input.mp3
+```
 
 ## Usage
 
@@ -252,3 +275,9 @@ Removes the config directory (`~/.config/neostore/neocut/`), deletes the binary,
 - [Architecture](docs/architecture.md)
 - [Configuration](docs/configuration.md)
 - [Troubleshooting](docs/troubleshooting.md)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+This project is released under the [MIT License](LICENSE) and follows the [Contributor Covenant](CODE_OF_CONDUCT.md). Security vulnerabilities can be reported via [SECURITY.md](SECURITY.md).

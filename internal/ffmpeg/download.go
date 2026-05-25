@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
@@ -50,7 +51,7 @@ func downloadWithProgress(url, destDir string) (string, error) {
 	defer f.Close()
 
 	total := resp.ContentLength
-	var written int64
+	var written atomic.Int64
 
 	done := make(chan struct{})
 	go func() {
@@ -64,8 +65,9 @@ func downloadWithProgress(url, destDir string) (string, error) {
 				fmt.Printf("\r  Downloading [%s] 100%%", bar)
 				return
 			default:
+				w := written.Load()
 				if total > 0 {
-					pct := float64(written) / float64(total)
+					pct := float64(w) / float64(total)
 					full := int(pct * float64(width))
 					part := int((pct*float64(width) - float64(full)) * 8)
 					bar := strings.Repeat("█", full)
@@ -83,7 +85,7 @@ func downloadWithProgress(url, destDir string) (string, error) {
 					if part > 0 {
 						bar += blocks[part]
 					}
-					bar += strings.Repeat(" ", width-full-1)
+					bar += strings.Repeat(" ", width-full)
 					fmt.Printf("\r  Downloading [%s]", bar)
 				}
 				i++
@@ -103,7 +105,7 @@ func downloadWithProgress(url, destDir string) (string, error) {
 				fmt.Println()
 				return "", writeErr
 			}
-			written += int64(wn)
+			written.Add(int64(wn))
 		}
 		if readErr == io.EOF {
 			break

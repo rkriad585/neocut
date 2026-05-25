@@ -228,6 +228,14 @@ Opens a TUI (powered by [huh](https://github.com/charmbracelet/huh)) to edit:
 - `history` entries are appended after each successful run
 - CLI flags always take precedence over config values
 
+## Testing
+
+```bash
+go test ./internal/...
+```
+
+85+ unit tests across all 6 internal packages covering config I/O, audio pipeline helpers, ffmpeg management, self-update logic, and CLI flag registration. No external test dependencies.
+
 ## Uninstalling
 
 ```bash

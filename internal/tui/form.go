@@ -83,5 +83,6 @@ func RunConfigForm() (*config.Config, error) {
 		SilenceThresh: silenceThresh,
 		KeepSilence:   keepSilence,
 		SeekStep:      1,
+		OutputDir:     outputDir,
 	}, nil
 }

@@ -32,11 +32,17 @@ func runSelfUninstall() int {
 
 	if runtime.GOOS == "windows" && binaryInside {
 		filepath.WalkDir(configDir, func(path string, d os.DirEntry, err error) error {
-			if err != nil || d.IsDir() {
+			if err != nil {
+				fmt.Printf("  Warning: error accessing %s: %v\n", path, err)
+				return nil
+			}
+			if d.IsDir() {
 				return nil
 			}
 			if !strings.EqualFold(path, exePath) {
-				os.Remove(path)
+				if rmErr := os.Remove(path); rmErr != nil {
+					fmt.Printf("  Warning: could not remove %s: %v\n", path, rmErr)
+				}
 			}
 			return nil
 		})
@@ -46,7 +52,12 @@ func runSelfUninstall() int {
 		}
 		fmt.Println("  ✓  Removed config files.")
 
-		batContent := fmt.Sprintf("@echo off\r\ntimeout /t 1 /nobreak >nul\r\nrmdir /s /q \"%s\" 2>nul\r\necho   neocut has been uninstalled.\r\ndel /f /q \"%%~f0\"\r\n", configDir)
+		batContent := fmt.Sprintf(`@echo off
+timeout /t 1 /nobreak >nul
+rmdir /s /q "%s" 2>nul
+echo   neocut has been uninstalled.
+del /f /q "%%~f0"
+`, configDir)
 		batPath := filepath.Join(os.TempDir(), "neocut-uninstall.bat")
 		if err := os.WriteFile(batPath, []byte(batContent), 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "  Error creating uninstall script: %v\n", err)
@@ -67,7 +78,12 @@ func runSelfUninstall() int {
 		}
 
 		if runtime.GOOS == "windows" {
-			batContent := fmt.Sprintf("@echo off\r\ntimeout /t 1 /nobreak >nul\r\ndel /f /q \"%s\" 2>nul\r\necho   neocut has been uninstalled.\r\ndel /f /q \"%%~f0\"\r\n", exePath)
+			batContent := fmt.Sprintf(`@echo off
+timeout /t 1 /nobreak >nul
+del /f /q "%s" 2>nul
+echo   neocut has been uninstalled.
+del /f /q "%%~f0"
+`, exePath)
 			batPath := filepath.Join(os.TempDir(), "neocut-uninstall.bat")
 			if err := os.WriteFile(batPath, []byte(batContent), 0644); err != nil {
 				fmt.Fprintf(os.Stderr, "  Error creating uninstall script: %v\n", err)

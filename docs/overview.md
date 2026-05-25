@@ -29,29 +29,41 @@ Every step shows an animated spinner or progress bar. Panics during silence dete
 neocut/
 ├── cmd/
 │   └── neocut/
-│       └── main.go          # Entry point
+│       └── main.go              # Entry point
 ├── internal/
 │   ├── cmd/
-│   │   ├── root.go          # Cobra root command + self-update
-│   │   └── uninstall.go     # --selfuninstall logic
+│   │   ├── root.go              # Cobra root command + self-update
+│   │   ├── root_test.go         # Cobra command and flag tests
+│   │   └── uninstall.go         # --selfuninstall logic
 │   ├── config/
-│   │   └── config.go        # Config struct, banner, version, directories
+│   │   ├── config.go            # Config struct, banner, version, directories
+│   │   ├── config_test.go       # ReadVersion, GetOutputDir, ConfigDir tests
+│   │   ├── jsonl.go             # JSONL config I/O (defaults, presets, history)
+│   │   ├── jsonl_test.go        # InitConfigFile, ReadConfig, WriteDefaults tests
+│   │   ├── gen.go               # go:generate helper (.version → version.txt)
+│   │   └── version.txt          # Embedded version file
 │   ├── core/
-│   │   └── processor.go     # Audio pipeline (load → split → combine → export)
+│   │   ├── processor.go         # Audio pipeline (load → split → combine → export)
+│   │   └── processor_test.go    # fmtDuration, SetQuietMode tests
 │   ├── ffmpeg/
-│   │   ├── ffmpeg.go        # ffmpeg detection, PATH setup, which.cmd shim
-│   │   └── download.go      # HTTP download with progress bar, archive extraction
+│   │   ├── ffmpeg.go            # ffmpeg detection, PATH setup, which.cmd shim
+│   │   ├── ffmpeg_test.go       # BinDir, pathContains, addToPATH tests
+│   │   ├── download.go          # HTTP download with progress bar, archive extraction
+│   │   └── download_test.go     # extractZip, downloadWithProgress tests
 │   ├── tui/
-│   │   └── form.go          # huh interactive form
+│   │   ├── form.go              # huh interactive processing form
+│   │   └── configedit.go        # huh config editor form
 │   └── update/
-│       └── update.go        # self-update: version fetch, download, binary replace
-├── docs/                    # Documentation
-├── build.ps1                # Windows cross-platform build script
-├── build.sh                 # Unix cross-platform build script
-├── installer.ps1            # Windows one-liner installer
-├── installer.sh             # Unix one-liner installer
-├── .version                 # Current version (v0.1.0)
-├── go.mod / go.sum          # Go module
+│       ├── update.go            # self-update: version fetch, download, binary replace
+│       └── update_test.go       # DownloadURL, filepathEval, replaceUnix tests
+├── docs/                        # Documentation
+├── vendor/                      # Vendored dependencies (godub patched in-tree)
+├── build.ps1                    # Windows cross-platform build script
+├── build.sh                     # Unix cross-platform build script
+├── installer.ps1                # Windows one-liner installer
+├── installer.sh                 # Unix one-liner installer
+├── .version                     # Current version (v0.2.4)
+├── go.mod / go.sum              # Go module
 └── README.md
 ```
 
@@ -60,7 +72,7 @@ neocut/
 | Component | Library |
 |-----------|---------|
 | CLI framework | [cobra](https://github.com/spf13/cobra) |
-| Audio processing | [godub](https://github.com/Vernacular-ai/godub) |
+| Audio processing | [godub](https://github.com/Vernacular-ai/godub) (vendored + patched) |
 | TUI forms | [huh](https://github.com/charmbracelet/huh) |
 | Config format | JSONL (JSON Lines) |
 | Audio codec | ffmpeg (auto-downloaded) |
@@ -77,3 +89,13 @@ After processing, neocut shows a summary with:
 - Input duration
 - Output duration
 - Silence removed (absolute and percentage)
+
+## Unit tests
+
+All internal packages have unit tests covering core logic, file I/O, HTTP downloads, CLI flag registration, and duration formatting:
+
+```bash
+go test ./internal/...
+```
+
+85+ tests across 6 packages — no external test dependencies required.

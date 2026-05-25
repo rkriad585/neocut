@@ -1,14 +1,8 @@
-# v0.2.2 — Plan (completed)
+# Plan
 
-## Summary
+## v0.2.2 — Output format flexibility
 
-Polish the config system, add output format flexibility, and improve discoverability. No new large features — focused on finishing what's been started.
-
----
-
-## ✅ 1. `--format` flag (output codec)
-
-**Status:** Done in `v0.2.2`
+### ✅ 1. `--format` flag (output codec)
 
 Users can now choose the output codec:
 
@@ -23,9 +17,7 @@ neocut -i input.mp3 --format mp3   # default
 
 ---
 
-## ✅ 2. `--bitrate` flag
-
-**Status:** Done in `v0.2.2`
+### ✅ 2. `--bitrate` flag
 
 ```bash
 neocut -i input.mp3 --format flac --bitrate 320
@@ -37,9 +29,7 @@ neocut -i input.mp3 --format flac --bitrate 320
 
 ---
 
-## ✅ 3. `--dry-run` flag (preview)
-
-**Status:** Done in `v0.2.2`
+### ✅ 3. `--dry-run` flag (preview)
 
 ```bash
 neocut -i input.mp3 --dry-run
@@ -49,24 +39,69 @@ Prints stats (segments, input/output duration, removal %) without actually expor
 
 ---
 
-## 4. `--save` flag (persist current params)
+## v0.2.3 — Vendored godub + clean error handling
 
-**TODO:** Save current CLI flags as config default or named preset.
+### ✅ 4. Vendor dependencies
+
+- `go mod vendor` creates `vendor/` directory with all dependencies
+- godub source vendored in-tree at `vendor/github.com/Vernacular-ai/godub/`
+- Allows patching godub without maintaining a separate fork
+
+### ✅ 5. Patch godub SplitOnSilence
+
+- Added `len(notSilenceRanges) == 0` guard to return clean error instead of index-out-of-range panic
+- Added `len(nonsilentRanges) > 0` guard preventing potential OOB in `cmp.Equal` dead code
 
 ---
 
-## 5. `--preset list` / `list` command
+## v0.2.4 — Bug fixes
 
-**TODO:** List available presets and history from config.jsonl.
+### ✅ 6. Fix normalization target in godub
+
+- Root cause: `matchTargetAmp(seg, -20.0)` normalizes audio to -20 dBFS, but silence threshold is -16 dBFS. After normalization, the entire signal appears below threshold.
+- Fix: changed normalization target from `-20.0` to `-10.0` so normalized signal sits above the -16 dBFS threshold.
+
+### ✅ 7. Fix self-update on Windows
+
+Three bugs in `replaceWindows`:
+1. Format-string arg mismatch (7 verbs, 6 args) — last `%s` rendered as garbage
+2. Wait-loop checked `tmpPath` instead of `exePath` — infinite loop
+3. `rename` source was `exePath` instead of `tmpPath` — no-op
+
+Result: old binary deleted, new one never moved, leaving no binary at all.
+
+### ✅ 8. Unit tests
+
+Added 7 test files with 85+ tests across all 6 internal packages:
+- config (config + jsonl): 10 tests
+- core: 3 tests (21 sub-cases for fmtDuration)
+- ffmpeg (ffmpeg + download): 21 tests
+- update: 7 tests
+- cmd: 6 tests
 
 ---
+
+## Future
+
+### 9. `--save` flag (persist current params)
+
+Save current CLI flags as config default or named preset.
+
+### 10. `--preset list` / `list` command
+
+List available presets and history from config.jsonl.
 
 ## Effort estimate
 
-| Item | Complexity | Status |
-|------|-----------|--------|
-| `--format` | low | ✅ Done |
-| `--bitrate` | low | ✅ Done |
-| `--dry-run` | low | ✅ Done |
-| `--save` | medium | ❌ Pending |
-| `--preset list` / `list` cmd | low | ❌ Pending |
+| Item | Complexity | Version | Status |
+|------|-----------|---------|--------|
+| `--format` | low | v0.2.2 | ✅ Done |
+| `--bitrate` | low | v0.2.2 | ✅ Done |
+| `--dry-run` | low | v0.2.2 | ✅ Done |
+| Vendor godub | low | v0.2.3 | ✅ Done |
+| Patch godub panic | low | v0.2.3 | ✅ Done |
+| Fix normalization | medium | v0.2.4 | ✅ Done |
+| Fix self-update | medium | v0.2.4 | ✅ Done |
+| Unit tests | medium | v0.2.4 | ✅ Done |
+| `--save` | medium | — | ❌ Pending |
+| `--preset list` / `list` cmd | low | — | ❌ Pending |

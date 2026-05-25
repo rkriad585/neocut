@@ -31,18 +31,6 @@ func isQuiet() bool {
 }
 
 func step(label string, fn func() error) error {
-	done := make(chan error, 1)
-	frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
-
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				done <- fmt.Errorf("panic: %v", r)
-			}
-		}()
-		done <- fn()
-	}()
-
 	if isQuiet() {
 		err := func() (e error) {
 			defer func() {
@@ -57,6 +45,18 @@ func step(label string, fn func() error) error {
 		}
 		return err
 	}
+
+	done := make(chan error, 1)
+	frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				done <- fmt.Errorf("panic: %v", r)
+			}
+		}()
+		done <- fn()
+	}()
 
 	i := 0
 	for {

@@ -31,6 +31,12 @@ This error means all audio segments were classified as silence and removed.
 neocut -i input.mp3 -s -30 -m 500 -k 100
 ```
 
+## "no non-silent audio detected" on all files
+
+This error in v0.2.3 meant every file was being classified as all-silence. This was caused by a godub bug where the audio normalization target (`-20 dBFS`) was below the silence threshold (`-16 dBFS`), making the entire normalized signal appear silent.
+
+**Fix:** Upgrade to v0.2.4+ which corrects the normalization target to `-10 dBFS`.
+
 ## Split on silence panics
 
 godub's `SplitOnSilence` can panic with "index out of range [-1]" on certain audio files with unusual silence patterns.
@@ -61,6 +67,18 @@ This means the `.version` file on the `main` branch on GitHub does not match or 
 
 - Make sure a GitHub release exists for the version returned by `.version`
 - Check that the release binary follows the naming convention `neocut-{os}-{arch}[.exe]`
+
+## `self-update` deletes the binary but doesn't replace it
+
+This was a bug in v0.2.1–v0.2.3 where the Windows update script:
+1. Had a format-string arg mismatch (7 verbs, 6 args)
+2. Checked for the temp file instead of the exe in the wait-loop (infinite loop)
+3. Renamed the exe to itself (no-op) instead of renaming the temp file
+
+**Fix:** Upgrade to v0.2.4+ by reinstalling:
+```powershell
+irm https://raw.githubusercontent.com/rkriad585/neocut/main/installer.ps1 | iex
+```
 
 ## Binary not found after installation
 

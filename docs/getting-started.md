@@ -60,7 +60,7 @@ neocut --version
 
 Expected output:
 ```
-neocut version v0.1.0
+neocut version v0.2.4
 ```
 
 ## First run

@@ -128,7 +128,7 @@ func AppendHistory(cfg *Config) error {
 
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		return nil
+		return err
 	}
 
 	outputDir := GetOutputDir(cfg)

@@ -2,7 +2,7 @@
 
 ## Overview
 
-neocut follows a standard Go project layout with `cmd/` for the entry point and `internal/` for private packages. The CLI is built with [cobra](https://github.com/spf13/cobra), audio processing is handled by [godub](https://github.com/Vernacular-ai/godub), and the interactive form uses [huh](https://github.com/charmbracelet/huh).
+neocut follows a standard Go project layout with `cmd/` for the entry point and `internal/` for private packages. The CLI is built with [cobra](https://github.com/spf13/cobra), audio processing is handled by [godub](https://github.com/Vernacular-ai/godub) (vendored and patched in-tree), and the interactive form uses [huh](https://github.com/charmbracelet/huh).
 
 ## Module map
 
@@ -13,10 +13,13 @@ cmd/neocut/main.go
 internal/cmd/root.go         ◄── cobra root command
     │
     ├── run()                 ◄── default RunE
+    │   ├── config.InitConfigFile()
+    │   ├── config.ReadConfig()
     │   ├── config.PrintBanner()
     │   ├── config.EnsureConfigDir()
-    │   ├── if --tui → tui.RunConfigForm()
-    │   └── core.Process(cfg) ◄── audio pipeline
+    │   ├── if --tui     → tui.RunConfigForm() → core.Process()
+    │   ├── if --config  → tui.RunConfigEditor()
+    │   └── else         → core.Process(cfg)
     │
     ├── selfUpdateCmd         ◄── "self-update" subcommand
     │   └── update.Run(version)
@@ -30,16 +33,22 @@ internal/cmd/root.go         ◄── cobra root command
 ### `internal/config`
 
 Responsible for:
-- Reading `.version` file at startup
-- Printing the banner to stdout
-- Resolving the output directory (`~/Downloads/neocut/`)
-- Resolving the config directory (`~/.config/neostore/neocut/`)
+- Reading `.version` file at startup (`ReadVersion()` — checks ldflags, then embedded, then .version file)
+- Printing the banner to stdout (`PrintBanner()`)
+- Resolving the output directory (`GetOutputDir()` — returns `~/Downloads/neocut/` by default)
+- Resolving the config directory (`ConfigDir()` → `~/.config/neostore/neocut/`)
+- JSONL config file management (`jsonl.go`):
+  - `InitConfigFile()` — creates config.jsonl with meta, defaults, and 3 presets (aggressive, gentle, speech)
+  - `ReadConfig()` — returns presets and default entry
+  - `WriteDefaults()` — replaces the default entry in config.jsonl
+  - `AppendHistory()` — records each processing run
+  - `FindPreset()` — case-insensitive preset lookup
 - Holding ldflags-injected values: `Commit`, `PublisherName`, `PublisherEmail`
 
 ### `internal/cmd`
 
 Contains cobra command definitions:
-- `root.go` — root command with all flags, the `self-update` subcommand, and error handling
+- `root.go` — root command with all flags (including `--format`, `--bitrate`, `--dry-run`), the `self-update` subcommand, and the `run()` function that applies defaults/presets/CLI overrides
 - `uninstall.go` — the `--selfuninstall` logic with platform-specific binary removal
 
 ### `internal/core`
@@ -47,19 +56,20 @@ Contains cobra command definitions:
 Audio processing pipeline. The `Process()` function:
 1. Ensures ffmpeg is available (`ffmpeg.Ensure()`)
 2. Loads the MP3 file via `godub.NewLoader().Load()`
-3. Splits on silence via `godub.SplitOnSilence()`
+3. Splits on silence via `godub.SplitOnSilence()` (vendored godub, patched normalization)
 4. Recombines chunks via `chunks[0].Append(chunks[1:])`
-5. Exports the result as MP3
+5. Exports the result with optional `WithDstFormat()` and `WithBitRate()`
 
-Each step is wrapped in `step()` which shows an animated spinner with panic recovery. Export uses `exportWithProgress()` for a unicode-block progress bar.
+Each step is wrapped in `step()` which shows an animated spinner with panic recovery. Export uses `exportWithProgress()` for a unicode-block progress bar. Dry-run mode skips step 5 entirely.
 
 ### `internal/ffmpeg`
 
 Manages the ffmpeg dependency:
 - `Ensure()` — checks `exec.LookPath("ffmpeg")`, if missing, triggers auto-download
-- `download.go` — downloads ffmpeg from well-known static build URLs
+- `download.go` — downloads ffmpeg from well-known static build URLs with a progress bar
 - On Windows, creates a `which.cmd` shim so godub's internal `which` detection works
 - PATH is extended with the config bin directory to pick up the downloaded ffmpeg
+- Archive extraction supports `.zip` (Windows) and `.tar.xz` (Linux/macOS)
 
 Download sources:
 | Platform | Source |
@@ -71,7 +81,7 @@ Download sources:
 ### `internal/tui`
 
 - `form.go` — Interactive processing form using [huh](https://github.com/charmbracelet/huh). Active when `--tui` flag is passed. Returns a populated `config.Config` struct.
-- `configedit.go` — Config editor TUI. Active when `--config` / `-c` flag is passed. Loads, displays, and saves `config.jsonl` defaults.
+- `configedit.go` — Config editor TUI. Active when `--config` / `-c` flag is passed. Loads, displays, and saves `config.jsonl` defaults, presets, and history.
 
 ### `internal/update`
 
@@ -81,7 +91,7 @@ Self-update mechanism:
 - `Run()` — orchestrates version check → download with progress → binary replacement
 - `replaceBinary()` — platform-specific replacement:
   - Unix: `os.Rename(tmp, exePath)` (inode stays alive)
-  - Windows: deferred `.bat` script that waits, deletes old, renames new, restarts
+  - Windows: deferred `.bat` script that waits for process exit, deletes old binary, renames new binary into place, and restarts
 
 ## Platform support
 
@@ -94,6 +104,25 @@ Self-update mechanism:
 | --selfuninstall | ✓ (bat) | ✓ (RemoveAll) | ✓ (RemoveAll) |
 | Build script | build.ps1 | build.sh | build.sh |
 | Installer | installer.ps1 | installer.sh | installer.sh |
+
+## Testing
+
+Each internal package has dedicated unit tests in `*_test.go` files:
+
+| Package | Test file | What it covers |
+|---------|-----------|----------------|
+| config | `config_test.go` | ReadVersion, PrintBanner, GetOutputDir, ConfigDir, directories |
+| config | `jsonl_test.go` | InitConfigFile, ReadConfig, WriteDefaults, AppendHistory, FindPreset |
+| core | `processor_test.go` | fmtDuration (21 sub-cases), SetQuietMode thread safety |
+| ffmpeg | `ffmpeg_test.go` | BinDir, pathContains, addToPATH, downloadURL, which shim |
+| ffmpeg | `download_test.go` | extractZip, downloadWithProgress (HTTP test server) |
+| update | `update_test.go` | DownloadURL, filepathEval, replaceUnix, downloadWithProgress |
+| cmd | `root_test.go` | Execute, flag registration, short-form uniqueness |
+
+Run all tests with:
+```bash
+go test ./internal/...
+```
 
 ## Build & release
 

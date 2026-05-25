@@ -15,6 +15,7 @@ neocut [command]
 | `--output` | `-o` | string | auto | Output filename (saved to output-dir) |
 | `--output-dir` | `-d` | string | `~/Downloads/neocut/` | Custom output directory |
 | `--tui` | `-t` | bool | `false` | Launch interactive TUI form |
+| `--config` | `-c` | bool | `false` | Edit project config interactively |
 | `--quiet` | `-q` | bool | `false` | Suppress banner, spinners, and progress |
 | `--min-silence-len` | `-m` | int | `1000` | Minimum silence length in milliseconds |
 | `--silence-thresh` | `-s` | float | `-16` | Silence threshold in dBFS |
@@ -131,6 +132,19 @@ neocut completion fish | source
 # PowerShell
 neocut completion powershell | Out-String | Invoke-Expression
 ```
+
+## Config editor
+
+```bash
+neocut -c
+```
+
+Opens an interactive TUI to edit `~/.config/neostore/neocut/config.jsonl`:
+
+1. **Default parameters** — set min silence length, silence threshold, keep silence, seek step, output directory
+2. **Presets overview** — shows all configured presets with their values
+3. **History browser** — last 5 processing runs with timestamps
+4. **Save** — confirms and writes changes
 
 ## Processing stats
 

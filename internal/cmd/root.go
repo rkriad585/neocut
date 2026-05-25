@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	cfg           config.Config
-	tuiMode       bool
-	selfUninstall bool
-	quietMode     bool
+	cfg             config.Config
+	tuiMode         bool
+	configEditMode  bool
+	selfUninstall   bool
+	quietMode       bool
 )
 
 var rootCmd = &cobra.Command{
@@ -48,6 +49,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&cfg.OutputName, "output", "o", "", "Output filename (saved to output-dir)")
 	rootCmd.Flags().StringVarP(&cfg.OutputDir, "output-dir", "d", "", "Output directory (default ~/Downloads/neocut/)")
 	rootCmd.Flags().BoolVarP(&tuiMode, "tui", "t", false, "Use interactive TUI mode")
+	rootCmd.Flags().BoolVarP(&configEditMode, "config", "c", false, "Edit project config interactively")
 	rootCmd.Flags().IntVarP(&cfg.MinSilenceLen, "min-silence-len", "m", 1000, "Minimum silence length in ms")
 	rootCmd.Flags().Float64VarP(&cfg.SilenceThresh, "silence-thresh", "s", -16.0, "Silence threshold in dBFS")
 	rootCmd.Flags().IntVarP(&cfg.KeepSilence, "keep-silence", "k", 100, "Silence to keep at boundaries in ms")
@@ -80,6 +82,10 @@ and the current executable is replaced.`,
 func run(cmd *cobra.Command, args []string) error {
 	if selfUninstall {
 		os.Exit(runSelfUninstall())
+	}
+
+	if configEditMode {
+		return tui.RunConfigEditor()
 	}
 
 	config.InitConfigFile()

@@ -14,6 +14,7 @@ All configuration is passed via CLI flags. There is no persistent configuration 
 | `-s / --silence-thresh` | `-16` dBFS | Volume threshold; segments below this are considered silence |
 | `-k / --keep-silence` | `100` ms | Silence to preserve at the boundaries of kept segments |
 | `-e / --seek-step` | `1` ms | Precision of silence detection (lower = more accurate but slower) |
+| `-c / --config` | `false` | Edit project config interactively via TUI |
 | `-t / --tui` | `false` | Launch interactive form instead of parsing flags |
 
 ## Silence detection parameters

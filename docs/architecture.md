@@ -70,7 +70,8 @@ Download sources:
 
 ### `internal/tui`
 
-Interactive form using [huh](https://github.com/charmbracelet/huh). Only active when `--tui` flag is passed. Returns a populated `config.Config` struct.
+- `form.go` — Interactive processing form using [huh](https://github.com/charmbracelet/huh). Active when `--tui` flag is passed. Returns a populated `config.Config` struct.
+- `configedit.go` — Config editor TUI. Active when `--config` / `-c` flag is passed. Loads, displays, and saves `config.jsonl` defaults.
 
 ### `internal/update`
 

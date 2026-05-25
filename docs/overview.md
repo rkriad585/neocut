@@ -62,6 +62,7 @@ neocut/
 | CLI framework | [cobra](https://github.com/spf13/cobra) |
 | Audio processing | [godub](https://github.com/Vernacular-ai/godub) |
 | TUI forms | [huh](https://github.com/charmbracelet/huh) |
+| Config format | JSONL (JSON Lines) |
 | Audio codec | ffmpeg (auto-downloaded) |
 
 ## Version

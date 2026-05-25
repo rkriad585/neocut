@@ -77,6 +77,7 @@ neocut -i input.mp3 [-o output.mp3] [flags]
 | `--output` | `-o` | auto | Output filename (saved to output-dir) |
 | `--output-dir` | `-d` | `~/Downloads/neocut/` | Output directory |
 | `--tui` | `-t` | `false` | Interactive TUI mode |
+| `--config` | `-c` | `false` | Edit project config interactively (huh TUI) |
 | `--quiet` | `-q` | `false` | Suppress banner, spinners, and progress |
 | `--preset` | | `""` | Load preset from config (aggressive, gentle, speech) |
 | `--min-silence-len` | `-m` | `1000` | Minimum silence length in ms |
@@ -183,7 +184,21 @@ Fetches the latest version from GitHub and replaces the current binary. Works on
 
 ## Project config
 
-neocut stores a JSONL config file at `~/.config/neostore/neocut/config.jsonl`:
+neocut stores a JSONL config file at `~/.config/neostore/neocut/config.jsonl`.
+
+### Editing interactively
+
+```bash
+neocut --config   # or neocut -c
+```
+
+Opens a TUI (powered by [huh](https://github.com/charmbracelet/huh)) to edit:
+- Default processing parameters
+- View configured presets
+- Browse recent processing history
+- Save changes back to config.jsonl
+
+### File format
 
 ```jsonl
 {"type":"meta","project":"neocut","version":"1","created":"2026-05-25T04:18:04Z"}

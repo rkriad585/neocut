@@ -162,6 +162,44 @@ func AppendHistory(cfg *Config) error {
 	return err
 }
 
+func WriteDefaults(d DefaultEntry) error {
+	path := ConfigFile()
+	if path == "" {
+		return fmt.Errorf("cannot determine config directory")
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	var newLines []string
+	replaced := false
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		var raw struct {
+			Type string `json:"type"`
+		}
+		if err := json.Unmarshal([]byte(line), &raw); err == nil && raw.Type == "default" {
+			jsonData, _ := json.Marshal(d)
+			newLines = append(newLines, string(jsonData))
+			replaced = true
+			continue
+		}
+		newLines = append(newLines, line)
+	}
+
+	if !replaced {
+		jsonData, _ := json.Marshal(d)
+		newLines = append(newLines, string(jsonData))
+	}
+
+	return os.WriteFile(path, []byte(strings.Join(newLines, "\n")+"\n"), 0644)
+}
+
 func FindPreset(presets []PresetEntry, name string) *PresetEntry {
 	for _, p := range presets {
 		if strings.EqualFold(p.Name, name) {

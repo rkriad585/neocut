@@ -219,6 +219,8 @@ func Process(cfg *config.Config) error {
 		return fmt.Errorf("export failed: %w", err)
 	}
 
+	config.AppendHistory(cfg)
+
 	if !isQuiet() {
 		fmt.Printf("  \u2713 Exported to %s\n", outputPath)
 		fmt.Println()

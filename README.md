@@ -78,6 +78,7 @@ neocut -i input.mp3 [-o output.mp3] [flags]
 | `--output-dir` | `-d` | `~/Downloads/neocut/` | Output directory |
 | `--tui` | `-t` | `false` | Interactive TUI mode |
 | `--quiet` | `-q` | `false` | Suppress banner, spinners, and progress |
+| `--preset` | | `""` | Load preset from config (aggressive, gentle, speech) |
 | `--min-silence-len` | `-m` | `1000` | Minimum silence length in ms |
 | `--silence-thresh` | `-s` | `-16` | Silence threshold in dBFS |
 | `--keep-silence` | `-k` | `100` | Silence to keep at boundaries in ms |
@@ -117,6 +118,9 @@ neocut -i vocals.mp3 -e 0.5
 
 # Quiet mode — suppress banners, only show output path (for scripts)
 neocut -i batch_input.mp3 -q
+
+# Use a preset from the config file (aggressive, gentle, or speech)
+neocut -i podcast.mp3 --preset speech
 
 # Interactive TUI mode — fill in options visually
 neocut --tui
@@ -176,6 +180,23 @@ neocut self-update
 ```
 
 Fetches the latest version from GitHub and replaces the current binary. Works on all platforms.
+
+## Project config
+
+neocut stores a JSONL config file at `~/.config/neostore/neocut/config.jsonl`:
+
+```jsonl
+{"type":"meta","project":"neocut","version":"1","created":"2026-05-25T04:18:04Z"}
+{"type":"default","min_silence_len":1000,"silence_thresh":-16.0,"keep_silence":100,"seek_step":1,"output_dir":""}
+{"type":"preset","name":"aggressive","min_silence_len":500,"silence_thresh":-24.0,"keep_silence":50,"seek_step":1}
+{"type":"preset","name":"gentle","min_silence_len":2000,"silence_thresh":-10.0,"keep_silence":200,"seek_step":5}
+{"type":"preset","name":"speech","min_silence_len":800,"silence_thresh":-20.0,"keep_silence":80,"seek_step":1}
+```
+
+- The `default` entry sets base parameters — override any field with CLI flags
+- `preset` entries are named collections of parameters, loaded via `--preset`
+- `history` entries are appended after each successful run
+- CLI flags always take precedence over config values
 
 ## Uninstalling
 

@@ -53,6 +53,7 @@ func init() {
 	rootCmd.Flags().IntVarP(&cfg.KeepSilence, "keep-silence", "k", 100, "Silence to keep at boundaries in ms")
 	rootCmd.Flags().IntVarP(&cfg.SeekStep, "seek-step", "e", 1, "Seek step in ms")
 	rootCmd.Flags().BoolVarP(&cfg.Quiet, "quiet", "q", false, "Suppress banner, spinners, and progress")
+	rootCmd.Flags().StringVar(&cfg.Preset, "preset", "", "Load preset from config (aggressive, gentle, speech)")
 	rootCmd.Flags().BoolVar(&selfUninstall, "selfuninstall", false, "Remove neocut and its config directory")
 
 	rootCmd.AddCommand(selfUpdateCmd)
@@ -79,6 +80,45 @@ and the current executable is replaced.`,
 func run(cmd *cobra.Command, args []string) error {
 	if selfUninstall {
 		os.Exit(runSelfUninstall())
+	}
+
+	config.InitConfigFile()
+	presets, defaults, _ := config.ReadConfig()
+	cfg.Presets = presets
+
+	if defaults != nil {
+		if !cmd.Flags().Changed("min-silence-len") {
+			cfg.MinSilenceLen = defaults.MinSilenceLen
+		}
+		if !cmd.Flags().Changed("silence-thresh") {
+			cfg.SilenceThresh = defaults.SilenceThresh
+		}
+		if !cmd.Flags().Changed("keep-silence") {
+			cfg.KeepSilence = defaults.KeepSilence
+		}
+		if !cmd.Flags().Changed("seek-step") {
+			cfg.SeekStep = defaults.SeekStep
+		}
+		if !cmd.Flags().Changed("output-dir") && defaults.OutputDir != "" {
+			cfg.OutputDir = defaults.OutputDir
+		}
+	}
+
+	if cfg.Preset != "" {
+		if p := config.FindPreset(presets, cfg.Preset); p != nil {
+			if !cmd.Flags().Changed("min-silence-len") {
+				cfg.MinSilenceLen = p.MinSilenceLen
+			}
+			if !cmd.Flags().Changed("silence-thresh") {
+				cfg.SilenceThresh = p.SilenceThresh
+			}
+			if !cmd.Flags().Changed("keep-silence") {
+				cfg.KeepSilence = p.KeepSilence
+			}
+			if !cmd.Flags().Changed("seek-step") {
+				cfg.SeekStep = p.SeekStep
+			}
+		}
 	}
 
 	version := config.ReadVersion()

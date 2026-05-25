@@ -29,6 +29,8 @@ type Config struct {
 	SeekStep      int
 	OutputDir     string
 	Quiet         bool
+	Preset        string
+	Presets       []PresetEntry
 }
 
 func ReadVersion() string {

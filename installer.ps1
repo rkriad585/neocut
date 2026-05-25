@@ -165,5 +165,5 @@ Write-Host ""
 Write-Host "  Run '$ProjectName --help' to get started."
 Write-Host "  To uninstall later, run this in PowerShell:"
 Write-Host ""
-Write-Host '    iex "& { $(Invoke-RestMethod https://raw.githubusercontent.com/'$GitHubUser'/'$ProjectName'/main/installer.ps1) } --selfuninstall"'
+Write-Host "    iex `"& { `$(Invoke-RestMethod https://raw.githubusercontent.com/$GitHubUser/$ProjectName/main/installer.ps1) } --selfuninstall`""
 Write-Host ""

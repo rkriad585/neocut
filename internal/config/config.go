@@ -48,12 +48,10 @@ func ReadVersion() string {
 func PrintBanner(version, commit string) {
 	fmt.Println()
 	fmt.Println("╭──────────────── neocut ───────────────────╮")
-	fmt.Printf("│      Author : RK Riad Khan                │\n")
-	fmt.Printf("│      Version: %-28s│\n", version)
-	fmt.Printf("│      Commit : %-28s│\n", commit)
-	fmt.Printf("│      %-38s│\n", PublisherName)
-	fmt.Printf("│      %-38s│\n", PublisherEmail)
-	fmt.Println("│      GitHub : rkriad585/neocut             │")
+	fmt.Printf("│  Author : RK Riad Khan                    │\n")
+	fmt.Printf("│  Version: %-30s│\n", version)
+	fmt.Printf("│  Commit : %-30s│\n", commit)
+	fmt.Println("│  GitHub : rkriad585/neocut                 │")
 	fmt.Println("╰───────────────────────────────────────────╯")
 	fmt.Println()
 }

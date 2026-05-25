@@ -97,17 +97,69 @@ neocut -i input.mp3 [-o output.mp3] [flags]
 ### Examples
 
 ```bash
-# Basic usage
-neocut -i podcast.mp3
+# Basic usage — removes all pauses from a podcast
+neocut -i podcast_episode.mp3
 
-# Custom output name
-neocut -i recording.mp3 -o cleaned.mp3
+# Custom output filename
+neocut -i recording.mp3 -o cleaned_recording.mp3
 
-# Aggressive silence removal
+# Custom output directory (for organizing projects)
+neocut -i interview.mp3 -d "D:\Projects\audio\cleaned"
+
+# Aggressive silence removal — catches short gaps, lower threshold
 neocut -i lecture.mp3 -m 500 -s -24 -k 50
 
-# Interactive TUI
+# Gentle removal — only long pauses, keep more natural silence
+neocut -i audiobook.mp3 -m 2000 -s -10 -k 200
+
+# High precision — slower but more accurate boundaries
+neocut -i vocals.mp3 -e 0.5
+
+# Quiet mode — suppress banners, only show output path (for scripts)
+neocut -i batch_input.mp3 -q
+
+# Interactive TUI mode — fill in options visually
 neocut --tui
+```
+
+## How it works
+
+neocut processes audio in four steps:
+
+```
+ Input MP3
+    │
+    ▼
+ ┌─────────────┐
+ │  1. Load    │  Reads the MP3 via ffmpeg + godub
+ └──────┬──────┘
+        ▼
+ ┌─────────────┐
+ │  2. Detect  │  Scans for silent regions using:
+ │   Silence   │    • silence-thresh: volume below this = silent
+ │             │    • min-silence-len: shortest silence to cut
+ │             │    • seek-step: how finely to scan
+ └──────┬──────┘
+        ▼
+ ┌─────────────┐
+ │  3. Split   │  Cuts out silent chunks, keeps non-silent
+ │   & Rejoin  │  segments, re-appends them with no gap
+ └──────┬──────┘
+        ▼
+ ┌─────────────┐
+ │  4. Export  │  Writes the result as MP3 to output-dir
+ └─────────────┘
+```
+
+The algorithm uses [godub.SplitOnSilence](https://github.com/Vernacular-ai/godub), which walks through the audio frame-by-frame (at `seek-step` granularity), marks frames below `silence-thresh` as silent, groups consecutive silent frames into regions, discards regions longer than `min-silence-len`, and keeps `keep-silence` ms of the boundary to avoid abrupt cuts.
+
+After processing, neocut shows a summary:
+
+```
+    Segments:     42              ← non-silent chunks found
+    Input:        45m 30s         ← original duration
+    Output:       38m 12s         ← duration after removal
+    Removed:      7m 18s (16.0%)  ← silence cut
 ```
 
 ## Output

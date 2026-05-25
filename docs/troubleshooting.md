@@ -35,7 +35,7 @@ neocut -i input.mp3 -s -30 -m 500 -k 100
 
 This error in v0.2.3 meant every file was being classified as all-silence. This was caused by a godub bug where the audio normalization target (`-20 dBFS`) was below the silence threshold (`-16 dBFS`), making the entire normalized signal appear silent.
 
-**Fix:** Upgrade to v0.2.4+ which corrects the normalization target to `-10 dBFS`.
+**Fix:** Upgrade to v1.0.1+ which corrects the normalization target to `-10 dBFS`.
 
 ## Split on silence panics
 
@@ -70,12 +70,12 @@ This means the `.version` file on the `main` branch on GitHub does not match or 
 
 ## `self-update` deletes the binary but doesn't replace it
 
-This was a bug in v0.2.1–v0.2.3 where the Windows update script:
+This was a bug in v0.2.1–v0.2.3 (fixed in v1.0.1) where the Windows update script:
 1. Had a format-string arg mismatch (7 verbs, 6 args)
 2. Checked for the temp file instead of the exe in the wait-loop (infinite loop)
 3. Renamed the exe to itself (no-op) instead of renaming the temp file
 
-**Fix:** Upgrade to v0.2.4+ by reinstalling:
+**Fix:** Upgrade to v1.0.1+ by reinstalling:
 ```powershell
 irm https://raw.githubusercontent.com/rkriad585/neocut/main/installer.ps1 | iex
 ```

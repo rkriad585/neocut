@@ -81,13 +81,24 @@ Added 7 test files with 85+ tests across all 6 internal packages:
 
 ---
 
+## v1.0.1 — Stable release
+
+### ✅ 9. Version bump to v1.0.1
+
+First stable release. All known bugs from v0.2.x are resolved:
+- godub normalization bug (all audio detected as silence)
+- self-update Windows bat script (binary deleted but not replaced)
+- Complete unit test coverage across all internal packages
+
+---
+
 ## Future
 
-### 9. `--save` flag (persist current params)
+### 10. `--save` flag (persist current params)
 
 Save current CLI flags as config default or named preset.
 
-### 10. `--preset list` / `list` command
+### 11. `--preset list` / `list` command
 
 List available presets and history from config.jsonl.
 
@@ -103,5 +114,6 @@ List available presets and history from config.jsonl.
 | Fix normalization | medium | v0.2.4 | ✅ Done |
 | Fix self-update | medium | v0.2.4 | ✅ Done |
 | Unit tests | medium | v0.2.4 | ✅ Done |
+| Stable release | low | v1.0.1 | ✅ Done |
 | `--save` | medium | — | ❌ Pending |
 | `--preset list` / `list` cmd | low | — | ❌ Pending |

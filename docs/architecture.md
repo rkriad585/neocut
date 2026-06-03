@@ -125,12 +125,55 @@ Run all tests with:
 go test ./internal/...
 ```
 
-## Build & release
+## Automated CI/CD release
 
-- Version is embedded via `//go:embed version.txt`, always available at runtime from any directory
-- Can be overridden via ldflags (`Version`) at build time
-- ldflags inject `Commit`, `PublisherName`, `PublisherEmail` into the binary
+### Trigger
+
+Push a semver tag (`git tag vx.x.x && git push --tags`) or run manually via the GitHub Actions UI.
+
+### Pipeline (`.github/workflows/release.yml`)
+
+```
+prepare ──────────────────────────────────────────────┐
+   └─ fetches .version from GitHub raw URL            │
+   └─ extracts commit SHA + pre-release flag          │
+                                                      ▼
+build (6 parallel) ──────────────────────────────► release ──► notify-on-failure
+   windows/amd64  (machine type  9)                   ▲
+   windows/arm64  (machine type 12)                   ▲
+   linux/amd64                                        ▲
+   linux/arm64    (cross-compiled w/ aarch64-gcc)     ▲
+   darwin/amd64   (macos-latest Intel runner)         ▲
+   darwin/arm64   (macos-latest M2 native runner)     ▲
+                                                      ▲
+changelog ────────────────────────────────────────────┘
+   └─ groups commits: feat / fix / perf / docs / other
+```
+
+### Output binaries
+
+| Platform | File |
+|---|---|
+| Windows AMD64 | `neocut-windows-amd64.exe` |
+| Windows ARM64 | `neocut-windows-arm64.exe` |
+| Linux AMD64 | `neocut-linux-amd64` |
+| Linux ARM64 | `neocut-linux-arm64` |
+| macOS Intel | `neocut-darwin-amd64` |
+| macOS Silicon | `neocut-darwin-arm64` |
+
+### ldflags injected
+
+| Variable | Source |
+|---|---|
+| `main.Version` | `.version` file (fetched from GitHub raw URL) |
+| `main.Commit` | `git rev-parse --short=8 HEAD` |
+| `main.PublisherName` | `rkriad585` |
+| `main.PublisherEmail` | `rkriad585@gmail.com` |
+
+### Local builds
+
+- Version embedded via `//go:embed version.txt` as fallback
 - `go:generate` directive syncs `.version` → `version.txt` via `gen.go`
-- Quiet mode (`cfg.Quiet`) is propagated to `core.SetQuietMode()` which skips animated spinners and progress bars, using direct function calls with panic recovery instead
-- Cross-platform scripts build 6 binaries: `{os}-{arch}` for windows/linux/darwin × amd64/arm64
-- Installer scripts download from `https://github.com/rkriad585/neocut/releases/download/{version}/{binary}`
+- Cross-platform scripts (`build.ps1` / `build.sh`) build 6 binaries to `bin/`
+- Installer scripts download from GitHub Releases
+- Quiet mode (`cfg.Quiet`) propagated to `core.SetQuietMode()` skips animated spinners

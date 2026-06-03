@@ -27,9 +27,12 @@ Every step shows an animated spinner or progress bar. Panics during silence dete
 
 ```
 neocut/
+├── .github/
+│   └── workflows/
+│       └── release.yml          # Auto build & release CI/CD
 ├── cmd/
 │   └── neocut/
-│       └── main.go              # Entry point
+│       └── main.go              # Entry point (Version/Commit/Publisher vars)
 ├── internal/
 │   ├── cmd/
 │   │   ├── root.go              # Cobra root command + self-update
@@ -74,6 +77,17 @@ neocut/
 ├── SECURITY.md                  # Security policy
 └── README.md
 ```
+
+## Automated releases
+
+Pushing a tag (`git tag vx.x.x && git push --tags`) triggers a GitHub Actions workflow that:
+1. Fetches the version from `.version` on GitHub
+2. Cross-compiles 6 platform binaries in parallel
+3. Generates a changelog grouped by commit type
+4. Publishes a GitHub Release with binaries + SHA-256 checksums
+5. Alerts on failure
+
+The workflow file is at `.github/workflows/release.yml`.
 
 ## Key technologies
 

@@ -53,8 +53,8 @@ cd neocut
 # Using Make (Linux/macOS)
 make
 
-# Or directly with Go
-go build -ldflags "-X neocut/internal/config.Commit=$(git rev-parse --short HEAD)" -o neocut ./cmd/neocut/
+# Or directly with Go (ldflags inject into main package)
+go build -ldflags "-X main.Version=$(cat .version) -X main.Commit=$(git rev-parse --short HEAD)" -o neocut ./cmd/neocut/
 ```
 
 ### Cross-platform build
@@ -74,6 +74,24 @@ Outputs 6 binaries to `bin/`:
 - `neocut-windows-amd64.exe`, `neocut-windows-arm64.exe`
 - `neocut-linux-amd64`, `neocut-linux-arm64`
 - `neocut-darwin-amd64`, `neocut-darwin-arm64`
+
+### Automated release (CI/CD)
+
+Push a tag and GitHub Actions builds + publishes all 6 binaries:
+
+```bash
+git tag v1.0.3
+git push --tags
+```
+
+The workflow:
+1. **Prepare** — fetches `.version` from GitHub, resolves tag/commit/prerelease
+2. **Build (6× parallel)** — cross-compiles for Windows/macOS/Linux × amd64/arm64
+3. **Changelog** — groups commits by `feat:` / `fix:` / `perf:` / `docs:` / other
+4. **Release** — creates GitHub Release with binaries + SHA-256 checksums
+5. **Notify** — failure alert (extensible to Slack)
+
+Zero manual steps. Everything in `.github/workflows/release.yml`.
 
 ### Docker
 

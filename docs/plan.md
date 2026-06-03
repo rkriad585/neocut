@@ -115,6 +115,33 @@ Added standard open-source repository files:
 - `.dockerignore` — Docker context exclusions
 - `CMakeLists.txt` — IDE/toolchain integration
 
+### ✅ 12. CI/CD release workflow
+
+Added `.github/workflows/release.yml` — fully automated build & release pipeline:
+
+```
+prepare → build (6 parallel) + changelog → release → notify-on-failure
+```
+
+- Trigger: `git tag v*` or manual dispatch
+- Fetches version from `.version` on GitHub raw URL
+- Cross-compiles all 6 platforms (Windows/macOS/Linux × amd64/arm64)
+- Generates changelog grouped by commit type (feat/fix/perf/docs/other)
+- Publishes GitHub Release with binaries + SHA-256 checksums
+- ldflags inject `main.Version` / `main.Commit` / `main.PublisherName` / `main.PublisherEmail`
+
+
+
+Added standard open-source repository files:
+- `LICENSE` — MIT License
+- `CODE_OF_CONDUCT.md` — Contributor Covenant v2.1
+- `CONTRIBUTING.md` — contribution guidelines
+- `SECURITY.md` — security vulnerability reporting policy
+- `Makefile` — build, test, docker, cross-compile targets
+- `Dockerfile` — multi-stage Docker build (golang:1.23-alpine → alpine:3.20)
+- `.dockerignore` — Docker context exclusions
+- `CMakeLists.txt` — IDE/toolchain integration
+
 ---
 
 ## Future
@@ -142,5 +169,6 @@ List available presets and history from config.jsonl.
 | Stable release | low | v1.0.1 | ✅ Done |
 | Replace batch script (real fix) | medium | v1.0.2 | ✅ Done |
 | Open-source files | low | v1.0.2 | ✅ Done |
+| CI/CD release workflow | medium | v1.0.2 | ✅ Done |
 | `--save` | medium | — | ❌ Pending |
 | `--preset list` / `list` cmd | low | — | ❌ Pending |

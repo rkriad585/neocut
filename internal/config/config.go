@@ -20,6 +20,21 @@ var (
 	PublisherEmail = "unknown"
 )
 
+func SetBuildInfo(version, commit, pubName, pubEmail string) {
+	if version != "" {
+		Version = version
+	}
+	if commit != "" {
+		Commit = commit
+	}
+	if pubName != "" {
+		PublisherName = pubName
+	}
+	if pubEmail != "" {
+		PublisherEmail = pubEmail
+	}
+}
+
 type Config struct {
 	InputFile     string
 	OutputName    string

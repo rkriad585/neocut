@@ -17,6 +17,8 @@ type DefaultEntry struct {
 	KeepSilence   int     `toml:"keep_silence" json:"keep_silence"`
 	SeekStep      int     `toml:"seek_step" json:"seek_step"`
 	OutputDir     string  `toml:"output_dir" json:"output_dir"`
+	Theme         string  `toml:"theme" json:"theme"`
+	ColorMode     string  `toml:"color_mode" json:"color_mode"`
 }
 
 type PresetEntry struct {
@@ -98,6 +100,8 @@ func InitConfigFile() error {
 			SilenceThresh: -16.0,
 			KeepSilence:   100,
 			SeekStep:      1,
+			Theme:         "sunny_beach_day",
+			ColorMode:     "auto",
 		},
 		Presets: []PresetEntry{
 			{Name: "aggressive", MinSilenceLen: 500, SilenceThresh: -24.0, KeepSilence: 50, SeekStep: 1},

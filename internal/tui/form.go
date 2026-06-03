@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/huh"
 
 	"neocut/internal/config"
+	"neocut/internal/theme"
 )
 
 func RunConfigForm() (*config.Config, error) {
@@ -61,7 +62,7 @@ func RunConfigForm() (*config.Config, error) {
 				).
 				Value(&keepSilence),
 		),
-	)
+	).WithTheme(buildHuhTheme(theme.Active().Name, ""))
 
 	if err := form.Run(); err != nil {
 		return nil, fmt.Errorf("cancelled")

@@ -159,6 +159,36 @@ Added standard open-source repository files:
 
 ---
 
+---
+
+## v1.1.0 — Theme system
+
+### ✅ 14. 13 color themes
+
+- 13 built-in themes with full hex color palettes
+- Role-based color system: Primary, Success, Warning, Error, Accent
+- Thread-safe theme activation via `sync.RWMutex`
+- Configurable via `[default]` section in `config.toml`
+
+### ✅ 15. Dark/light mode
+
+- `--color-mode` flag: `auto`, `dark`, `light`
+- `auto` uses the configured theme's native colors
+- `dark` forces Dark Theme regardless of selected theme
+- `light` forces Light Theme regardless of selected theme
+
+### ✅ 16. Theme-aware TUI
+
+- Config editor includes theme picker dropdown + color mode selector + live color swatch preview
+- Processing TUI uses themed colors for borders, titles, descriptions, buttons, input fields
+- ANSI-colorized spinner frames, checkmarks, X marks, progress bar blocks, step labels, stats output
+
+### ✅ 17. Unit tests
+
+- 13 tests covering Find, Names, Labels, Hex, Resolve, ResolveColors, IsDark, SetActive, Sprintf, SprintfBold
+
+---
+
 ## Future
 
 ### 10. `--save` flag (persist current params)
@@ -186,5 +216,6 @@ List available presets and history from config.toml + history.log.
 | Open-source files | low | v1.0.2 | ✅ Done |
 | CI/CD release workflow | medium | v1.0.2 | ✅ Done |
 | TOML config system | medium | v1.0.3 | ✅ Done |
+| Theme system | medium | v1.1.0 | ✅ Done |
 | `--save` | medium | — | ❌ Pending |
 | `--preset list` / `list` cmd | low | — | ❌ Pending |

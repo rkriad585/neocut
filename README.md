@@ -123,6 +123,8 @@ neocut -i input.mp3 [-o output.mp3] [flags]
 | `--config` | `-c` | `false` | Edit project config interactively (huh TUI) |
 | `--quiet` | `-q` | `false` | Suppress banner, spinners, and progress |
 | `--preset` | | `""` | Load preset from config (aggressive, gentle, speech) |
+| `--theme` | | `""` | Theme name (e.g. dark, sunny_beach_day, olive_garden_feast) |
+| `--color-mode` | | `"auto"` | Color mode: auto, dark, light |
 | `--format` | `-f` | `mp3` | Output format: mp3, wav, flac |
 | `--bitrate` | `-b` | `0` | Output bitrate in kbps (e.g. 192, 320) |
 | `--dry-run` | | `false` | Preview stats without exporting |
@@ -250,6 +252,7 @@ neocut --config   # or neocut -c
 
 Opens a TUI (powered by [huh](https://github.com/charmbracelet/huh)) to edit:
 - Default processing parameters
+- Theme and color mode
 - View configured presets
 - Browse recent processing history
 - Save changes back to config.toml
@@ -263,6 +266,8 @@ silence_thresh = -16.0
 keep_silence = 100
 seek_step = 1
 output_dir = ""
+theme = "sunny_beach_day"
+color_mode = "auto"
 
 [[preset]]
 name = "aggressive"
@@ -288,8 +293,34 @@ seek_step = 1
 
 - The `[default]` section sets base parameters — override any field with CLI flags
 - `[[preset]]` entries are named collections of parameters, loaded via `--preset`
+- `theme` and `color_mode` in `[default]` control the UI color scheme
 - Processing history is appended to `history.log` after each successful run
 - CLI flags always take precedence over config values
+
+## Theme system
+
+neocut ships with 13 built-in color themes that can be set via `--theme`, config, or the config editor (`neocut -c`):
+
+| Theme | Description |
+|-------|-------------|
+| `dark` | Classic dark mode (default fallback for dark color modes) |
+| `light` | Clean light theme (default fallback for light color modes) |
+| `sunny_beach_day` | Warm tropical palette (default) |
+| `olive_garden_feast` | Earthy tones |
+| `summer_ocean_breeze` | Cool coastal blues |
+| `refreshing_summer_fun` | Bright citrus |
+| `black_gold_elegance` | Premium dark + gold |
+| `vibrant_color_fiesta` | Neon festival |
+| `light_steel` | Industrial grays |
+| `golden_twilight` | Sunset amber |
+| `deep_sea` | Deep ocean blues |
+| `bright_green` | Fresh nature green |
+| `vivid_nightfall` | Purple twilight |
+
+The `--color-mode` flag forces the UI into dark or light mode regardless of the selected theme:
+- `auto` — use theme's native colors (default)
+- `dark` — force Dark Theme (overrides the selected theme)
+- `light` — force Light Theme (overrides the selected theme)
 
 ## Testing
 

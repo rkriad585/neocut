@@ -49,6 +49,8 @@ type Config struct {
 	Format        string
 	Bitrate       int
 	DryRun        bool
+	ThemeName     string
+	ColorMode     string
 }
 
 func ReadVersion() string {

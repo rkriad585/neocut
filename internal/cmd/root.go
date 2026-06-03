@@ -8,6 +8,7 @@ import (
 
 	"neocut/internal/config"
 	"neocut/internal/core"
+	"neocut/internal/theme"
 	"neocut/internal/tui"
 	"neocut/internal/update"
 )
@@ -59,6 +60,8 @@ func init() {
 	rootCmd.Flags().IntVarP(&cfg.SeekStep, "seek-step", "e", 1, "Seek step in ms")
 	rootCmd.Flags().BoolVarP(&cfg.Quiet, "quiet", "q", false, "Suppress banner, spinners, and progress")
 	rootCmd.Flags().StringVar(&cfg.Preset, "preset", "", "Load preset from config (aggressive, gentle, speech)")
+	rootCmd.Flags().StringVar(&cfg.ThemeName, "theme", "", "Theme name (dark, light, sunny_beach_day, ...)")
+	rootCmd.Flags().StringVar(&cfg.ColorMode, "color-mode", "", "Color mode: auto, dark, light")
 	rootCmd.Flags().BoolVar(&selfUninstall, "selfuninstall", false, "Remove neocut and its config directory")
 
 	rootCmd.AddCommand(selfUpdateCmd)
@@ -111,7 +114,22 @@ func run(cmd *cobra.Command, args []string) error {
 		if !cmd.Flags().Changed("output-dir") && defaults.OutputDir != "" {
 			cfg.OutputDir = defaults.OutputDir
 		}
+		if !cmd.Flags().Changed("theme") && defaults.Theme != "" {
+			cfg.ThemeName = defaults.Theme
+		}
+		if !cmd.Flags().Changed("color-mode") && defaults.ColorMode != "" {
+			cfg.ColorMode = defaults.ColorMode
+		}
 	}
+
+	if cfg.ThemeName == "" {
+		cfg.ThemeName = "sunny_beach_day"
+	}
+	if cfg.ColorMode == "" {
+		cfg.ColorMode = "auto"
+	}
+
+	theme.SetActive(cfg.ThemeName, cfg.ColorMode)
 
 	if cfg.Preset != "" {
 		if p := config.FindPreset(presets, cfg.Preset); p != nil {

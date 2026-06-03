@@ -18,6 +18,8 @@ All configuration is passed via CLI flags. Persistent defaults and presets are s
 | `-k / --keep-silence` | `100` ms | Silence to preserve at the boundaries of kept segments |
 | `-e / --seek-step` | `1` ms | Precision of silence detection (lower = more accurate but slower) |
 | `--preset` | `""` | Load a named preset from config.toml (`aggressive`, `gentle`, `speech`) |
+| `--theme` | `""` | Theme name (e.g. `dark`, `sunny_beach_day`, `olive_garden_feast`) |
+| `--color-mode` | `"auto"` | Color mode: `auto`, `dark`, `light` |
 | `-c / --config` | `false` | Edit project config interactively via TUI |
 | `-t / --tui` | `false` | Launch interactive form instead of parsing flags |
 
@@ -27,7 +29,7 @@ Located at `~/.config/neostore/neocut/config.toml`, this TOML file stores:
 
 | Section | Purpose |
 |---------|---------|
-| `[default]` | Persistent default values for all flags |
+| `[default]` | Persistent default values for all flags + UI settings |
 | `[[preset]]` | Named presets (e.g. `aggressive`, `gentle`, `speech`) |
 
 Processing history is stored in a separate `history.log` file in the same directory.
@@ -97,4 +99,57 @@ When `--tui` is passed, neocut launches an interactive form powered by [huh](htt
 The TUI is triggered with:
 ```bash
 neocut --tui
+```
+
+## Theme system
+
+neocut has 13 built-in color themes. Set via `--theme`, config, or `neocut -c` (config editor).
+
+### Themes
+
+| Config name | Label | Description |
+|-------------|-------|-------------|
+| `dark` | Dark | Classic dark mode |
+| `light` | Light | Clean light theme |
+| `sunny_beach_day` | Sunny Beach Day | Warm tropical palette (default) |
+| `olive_garden_feast` | Olive Garden Feast | Earthy tones |
+| `summer_ocean_breeze` | Summer Ocean Breeze | Cool coastal blues |
+| `refreshing_summer_fun` | Refreshing Summer Fun | Bright citrus |
+| `black_gold_elegance` | Black Gold Elegance | Premium dark + gold |
+| `vibrant_color_fiesta` | Vibrant Color Fiesta | Neon festival |
+| `light_steel` | Light Steel | Industrial grays |
+| `golden_twilight` | Golden Twilight | Sunset amber |
+| `deep_sea` | Deep Sea | Deep ocean blues |
+| `bright_green` | Bright Green | Fresh nature green |
+| `vivid_nightfall` | Vivid Nightfall | Purple twilight |
+
+### Color modes
+
+| Mode | Effect |
+|------|--------|
+| `auto` (default) | Use the selected theme's native colors |
+| `dark` | Force Dark Theme (overrides the selected theme) |
+| `light` | Force Light Theme (overrides the selected theme) |
+
+### Config file fields
+
+In `~/.config/neostore/neocut/config.toml`:
+
+```toml
+[default]
+theme = "sunny_beach_day"
+color_mode = "auto"
+```
+
+### CLI flags
+
+```bash
+# Use a specific theme
+neocut --theme dark -i input.mp3
+
+# Force dark mode
+neocut --color-mode dark -i input.mp3
+
+# Override both
+neocut --theme olive_garden_feast --color-mode auto -i input.mp3
 ```

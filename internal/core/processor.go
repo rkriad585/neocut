@@ -13,6 +13,7 @@ import (
 
 	"neocut/internal/config"
 	"neocut/internal/ffmpeg"
+	"neocut/internal/theme"
 )
 
 var quietMode bool
@@ -49,6 +50,10 @@ func step(label string, fn func() error) error {
 	done := make(chan error, 1)
 	frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
 
+	spinnerColor := theme.RoleColor(theme.RoleWarning)
+	checkColor := theme.RoleColor(theme.RoleSuccess)
+	xColor := theme.RoleColor(theme.RoleError)
+
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
@@ -63,14 +68,14 @@ func step(label string, fn func() error) error {
 		select {
 		case err := <-done:
 			if err != nil {
-				fmt.Printf("\r  \u2717 %s\n", label)
+				fmt.Printf("\r  %s %s\n", theme.Sprintf("\u2717", xColor), label)
 				fmt.Printf("    Error: %v\n", err)
 			} else {
-				fmt.Printf("\r  \u2713 %s\n", label)
+				fmt.Printf("\r  %s %s\n", theme.Sprintf("\u2713", checkColor), label)
 			}
 			return err
 		default:
-			fmt.Printf("\r  %s %s", frames[i%len(frames)], label)
+			fmt.Printf("\r  %s %s", theme.Sprintf(frames[i%len(frames)], spinnerColor), label)
 			i++
 			time.Sleep(80 * time.Millisecond)
 		}
@@ -85,24 +90,33 @@ func exportWithProgress(exporter *godub.Exporter, segment *godub.AudioSegment) e
 	done := make(chan struct{})
 	blocks := []string{"▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"}
 	width := 30
+	barColor := theme.RoleColor(theme.RoleAccent)
+	fullBlock := theme.Sprintf("█", barColor)
+	checkColor := theme.RoleColor(theme.RoleSuccess)
 
 	go func() {
 		i := 0
 		for {
 			select {
 			case <-done:
-				bar := strings.Repeat("█", width)
-				fmt.Printf("\r  \u2713 Exporting audio [%s] 100%%", bar)
+				bar := strings.Repeat(fullBlock, width)
+				fmt.Printf("\r  %s Exporting audio [%s] 100%%", theme.Sprintf("\u2713", checkColor), bar)
 				return
 			default:
 				pos := i % (width * 8)
 				full := pos / 8
 				part := pos % 8
-				bar := strings.Repeat("█", full)
+				bar := strings.Repeat(fullBlock, full)
 				if part > 0 {
-					bar += blocks[part]
+					bar += theme.Sprintf(blocks[part], barColor)
 				}
-				bar += strings.Repeat(" ", width-full-1)
+				emptyCount := width - full
+				if part > 0 {
+					emptyCount--
+				}
+				if emptyCount > 0 {
+					bar += strings.Repeat(" ", emptyCount)
+				}
 				fmt.Printf("\r    Exporting [%s]", bar)
 				i++
 				time.Sleep(40 * time.Millisecond)
@@ -134,6 +148,7 @@ func fmtDuration(d time.Duration) string {
 
 func Process(cfg *config.Config) error {
 	SetQuietMode(cfg.Quiet)
+	theme.SetActive(cfg.ThemeName, cfg.ColorMode)
 
 	if err := ffmpeg.Ensure(); err != nil {
 		return fmt.Errorf("ffmpeg setup failed: %w", err)
@@ -219,7 +234,7 @@ func Process(cfg *config.Config) error {
 	if cfg.DryRun {
 		config.AppendHistory(cfg)
 		if !isQuiet() {
-			fmt.Printf("  \u2713 Dry-run complete — no file written.\n")
+			fmt.Printf("  %s Dry-run complete — no file written.\n", theme.Sprintf("\u2713", theme.RoleColor(theme.RoleSuccess)))
 			fmt.Println()
 		}
 		return nil
@@ -238,12 +253,12 @@ func Process(cfg *config.Config) error {
 	config.AppendHistory(cfg)
 
 	if !isQuiet() {
-		fmt.Printf("  \u2713 Exported to %s\n", outputPath)
+		fmt.Printf("  %s Exported to %s\n", theme.Sprintf("\u2713", theme.RoleColor(theme.RoleSuccess)), outputPath)
 		fmt.Println()
 		if cfg.Bitrate > 0 {
 			fmt.Printf("  Format: %s @ %dkbps\n", strings.ToUpper(format), cfg.Bitrate)
 		}
-		fmt.Printf("  Done! (OS: %s/%s)\n", runtime.GOOS, runtime.GOARCH)
+		fmt.Printf("  %s (OS: %s/%s)\n", theme.SprintfBold("Done!", theme.RoleColor(theme.RoleSuccess)), runtime.GOOS, runtime.GOARCH)
 		fmt.Println()
 	} else {
 		fmt.Println(outputPath)

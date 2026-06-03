@@ -10,19 +10,23 @@ import (
 	"github.com/charmbracelet/huh"
 
 	"neocut/internal/config"
+	"neocut/internal/theme"
 )
 
 func RunConfigEditor() error {
 	presets, defaults, _ := config.ReadConfig()
 
 	var (
-		minSilenceLen    = 1000
-		silenceThreshStr = "-16.0"
-		keepSilence      = 100
-		seekStep         = 1
-		outputDir        string
-		historyNote      = "  No history yet."
-		save             = false
+		minSilenceLen     = 1000
+		silenceThreshStr  = "-16.0"
+		keepSilence       = 100
+		seekStep          = 1
+		outputDir         string
+		themeName         = "sunny_beach_day"
+		colorMode         = "auto"
+		historyNote       = "  No history yet."
+		save              = false
+		previewNote       = ""
 	)
 
 	if defaults != nil {
@@ -31,6 +35,12 @@ func RunConfigEditor() error {
 		keepSilence = defaults.KeepSilence
 		seekStep = defaults.SeekStep
 		outputDir = defaults.OutputDir
+		if defaults.Theme != "" {
+			themeName = defaults.Theme
+		}
+		if defaults.ColorMode != "" {
+			colorMode = defaults.ColorMode
+		}
 	}
 
 	var presetLines []string
@@ -55,6 +65,28 @@ func RunConfigEditor() error {
 		huh.NewOption("10 ms (fast)", 10),
 		huh.NewOption("20 ms (fastest)", 20),
 	}
+
+	themeNames := theme.Names()
+	var themeOpts = make([]huh.Option[string], 0, len(themeNames))
+	for _, n := range themeNames {
+		t, _ := theme.Find(n)
+		themeOpts = append(themeOpts, huh.NewOption(t.Label, n))
+	}
+
+	previewColors := func(name, mode string) string {
+		rc := theme.ResolveColors(name, mode)
+		return fmt.Sprintf(
+			"  %s%s  %s%s  %s%s  %s%s  %s%s",
+			theme.Sprintf("██", rc.Primary), rc.Primary,
+			theme.Sprintf("██", rc.Success), rc.Success,
+			theme.Sprintf("██", rc.Warning), rc.Warning,
+			theme.Sprintf("██", rc.Error), rc.Error,
+			theme.Sprintf("██", rc.Accent), rc.Accent,
+		)
+	}
+
+	activeTheme := theme.Resolve(themeName, colorMode)
+	previewNote = previewColors(activeTheme.Name, colorMode)
 
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -99,17 +131,37 @@ func RunConfigEditor() error {
 				Value(&outputDir),
 		),
 		huh.NewGroup(
+			huh.NewNote().Title("Appearance").
+				Description("Choose theme and color mode"),
+			huh.NewSelect[string]().
+				Title("Theme").
+				Description("Pick a color theme for the UI").
+				Options(themeOpts...).
+				Value(&themeName),
+			huh.NewSelect[string]().
+				Title("Color Mode").
+				Description("auto = use theme colors; dark = force dark; light = force light").
+				Options(
+					huh.NewOption("Auto (use theme)", "auto"),
+					huh.NewOption("Dark (force dark theme)", "dark"),
+					huh.NewOption("Light (force light theme)", "light"),
+				).
+				Value(&colorMode),
+			huh.NewNote().Title("Theme Preview").
+				Description(previewNote),
+		),
+		huh.NewGroup(
 			huh.NewNote().Title("Configured Presets").
 				Description(strings.Join(presetLines, "\n")),
 			huh.NewNote().Title("Recent History").
 				Description(historyNote),
-			huh.NewConfirm().
-				Title("Save these defaults?").
-				Affirmative("Save").
-				Negative("Cancel").
-				Value(&save),
+		huh.NewConfirm().
+			Title("Save these defaults?").
+			Affirmative("Save").
+			Negative("Cancel").
+			Value(&save),
 		),
-	)
+	).WithTheme(buildHuhTheme(themeName, colorMode))
 
 	if err := form.Run(); err != nil {
 		os.Exit(0)
@@ -132,10 +184,13 @@ func RunConfigEditor() error {
 		KeepSilence:   keepSilence,
 		SeekStep:      seekStep,
 		OutputDir:     outputDir,
+		Theme:         themeName,
+		ColorMode:     colorMode,
 	}); err != nil {
 		return fmt.Errorf("failed to save config: %w", err)
 	}
 
+	theme.SetActive(themeName, colorMode)
 	fmt.Println("  Defaults saved to config.toml")
 	return nil
 }

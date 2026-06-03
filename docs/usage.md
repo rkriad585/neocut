@@ -17,6 +17,8 @@ neocut [command]
 | `--tui` | `-t` | bool | `false` | Launch interactive TUI form |
 | `--config` | `-c` | bool | `false` | Edit project config interactively |
 | `--quiet` | `-q` | bool | `false` | Suppress banner, spinners, and progress |
+| `--theme` | | string | `""` | Theme name (dark, light, sunny_beach_day, olive_garden_feast, summer_ocean_breeze, refreshing_summer_fun, black_gold_elegance, vibrant_color_fiesta, light_steel, golden_twilight, deep_sea, bright_green, vivid_nightfall) |
+| `--color-mode` | | string | `"auto"` | Color mode: auto, dark, light |
 | `--format` | `-f` | string | `mp3` | Output codec: `mp3`, `wav`, `flac` |
 | `--bitrate` | `-b` | int | `0` | Output bitrate in kbps (e.g. `192`, `320`); 0 = codec default |
 | `--dry-run` | | bool | `false` | Preview stats (segments, durations, removal %) without exporting |
@@ -177,9 +179,10 @@ neocut -c
 Opens an interactive TUI to edit `~/.config/neostore/neocut/config.toml`:
 
 1. **Default parameters** — set min silence length, silence threshold, keep silence, seek step, output directory
-2. **Presets overview** — shows all configured presets with their values
-3. **History browser** — last 5 processing runs with timestamps
-4. **Save** — confirms and writes changes
+2. **Appearance** — pick from 13 themes, choose color mode (auto/dark/light), preview color swatches
+3. **Presets overview** — shows all configured presets with their values
+4. **History browser** — last 5 processing runs with timestamps
+5. **Save** — confirms and writes changes
 
 ## Processing stats
 

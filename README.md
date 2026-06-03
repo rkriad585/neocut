@@ -15,6 +15,7 @@
 - Interactive TUI mode via `--tui` (powered by [huh](https://github.com/charmbracelet/huh))
 - Output in MP3, WAV, or FLAC via `--format` with configurable `--bitrate`
 - Preview stats without exporting via `--dry-run` (iterate quickly)
+- 13 built-in color themes with dark/light mode (`--theme`, `--color-mode`)
 - Auto-downloads ffmpeg when missing (Windows, Linux, macOS)
 - `self-update` command to upgrade to the latest release
 - `--selfuninstall` flag to fully remove neocut from the system
@@ -180,6 +181,15 @@ neocut -i podcast.mp3 --dry-run
 # FLAC with custom bitrate
 neocut -i master.mp3 -f flac -b 320
 
+# Use a dark theme
+neocut -i podcast.mp3 --theme dark
+
+# Force dark mode regardless of theme
+neocut -i lecture.mp3 --color-mode dark
+
+# Preview theme colors in the config editor
+neocut --config
+
 # Interactive TUI mode — fill in options visually
 neocut --tui
 ```
@@ -213,7 +223,7 @@ neocut processes audio in four steps:
  └─────────────┘
 ```
 
-The algorithm uses [godub.SplitOnSilence](https://github.com/Vernacular-ai/godub), which walks through the audio frame-by-frame (at `seek-step` granularity), marks frames below `silence-thresh` as silent, groups consecutive silent frames into regions, discards regions longer than `min-silence-len`, and keeps `keep-silence` ms of the boundary to avoid abrupt cuts.
+Each step shows a colorized animated spinner (powered by the active theme). The algorithm uses [godub.SplitOnSilence](https://github.com/Vernacular-ai/godub), which walks through the audio frame-by-frame (at `seek-step` granularity), marks frames below `silence-thresh` as silent, groups consecutive silent frames into regions, discards regions longer than `min-silence-len`, and keeps `keep-silence` ms of the boundary to avoid abrupt cuts.
 
 After processing, neocut shows a summary:
 

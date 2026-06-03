@@ -32,7 +32,7 @@ name: Auto Build & Release
 
 env:
   PROJECT_NAME:    neocut
-  GO_VERSION:      1.25.0
+  GO_VERSION:      1.23
   PUBLISHER_NAME:  rkriad585
   PUBLISHER_EMAIL: rkriad585@gmail.com
 
@@ -205,7 +205,7 @@ jobs:
           echo " Commit : ${COMMIT}"
           echo "-------------------------------------------"
 
-          go build -trimpath -ldflags "${LDFLAGS}" -o "${OUTFILE}" .
+          go build -trimpath -ldflags "${LDFLAGS}" -o "${OUTFILE}" ./cmd/neocut/
 
           ls -lh "${OUTFILE}"
           echo "OUTFILE=${OUTFILE}" >> "$GITHUB_ENV"
@@ -252,7 +252,7 @@ jobs:
           COMMIT="${{ needs.prepare.outputs.commit }}"
           PROJECT="${{ env.PROJECT_NAME }}"
 
-          PREV=$(git tag --sort=-creatordate | grep -v "^${TAG}$" | head -n 1 || true)
+          PREV=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || git tag --sort=-creatordate | grep -v "^${TAG}$" | head -n 1 || true)
           RANGE="${PREV:+${PREV}..${TAG}}"
           RANGE="${RANGE:-HEAD}"
 

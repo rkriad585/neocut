@@ -53,9 +53,13 @@ neocut/
 │   │   ├── ffmpeg_test.go       # BinDir, pathContains, addToPATH tests
 │   │   ├── download.go          # HTTP download with progress bar, archive extraction
 │   │   └── download_test.go     # extractZip, downloadWithProgress tests
+│   ├── theme/
+│   │   ├── theme.go             # 13 themes, role colors, ANSI colorization
+│   │   └── theme_test.go        # Find, Names, Resolve, SetActive, Sprintf tests
 │   ├── tui/
+│   │   ├── themehuh.go          # Custom huh theme builder from active role colors
 │   │   ├── form.go              # huh interactive processing form
-│   │   └── configedit.go        # huh config editor form
+│   │   └── configedit.go        # huh config editor (includes theme picker)
 │   └── update/
 │       ├── update.go            # self-update: version fetch, download, binary replace
 │       └── update_test.go       # DownloadURL, filepathEval, replaceUnix tests
@@ -96,6 +100,7 @@ The workflow file is at `.github/workflows/release.yml`.
 | CLI framework | [cobra](https://github.com/spf13/cobra) |
 | Audio processing | [godub](https://github.com/Vernacular-ai/godub) (vendored + patched) |
 | TUI forms | [huh](https://github.com/charmbracelet/huh) |
+| Theme system | 13 built-in themes with ANSI colorization |
 | Config format | TOML (`config.toml`) |
 | Audio codec | ffmpeg (auto-downloaded) |
 
@@ -120,4 +125,4 @@ All internal packages have unit tests covering core logic, file I/O, HTTP downlo
 go test ./internal/...
 ```
 
-85+ tests across 6 packages — no external test dependencies required.
+100+ tests across 7 packages — no external test dependencies required.

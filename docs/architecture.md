@@ -17,6 +17,7 @@ internal/cmd/root.go         ◄── cobra root command
     │   ├── config.ReadConfig()
     │   ├── config.PrintBanner()
     │   ├── config.EnsureConfigDir()
+    │   ├── theme.SetActive() — resolves theme from config/flags
     │   ├── if --tui     → tui.RunConfigForm() → core.Process()
     │   ├── if --config  → tui.RunConfigEditor()
     │   └── else         → core.Process(cfg)
@@ -78,10 +79,23 @@ Download sources:
 | Linux | [johnvansickle.com](https://johnvansickle.com/ffmpeg/) |
 | macOS | [evermeet.cx](https://evermeet.cx/ffmpeg/) |
 
+### `internal/theme`
+
+Theme system with 13 built-in color themes:
+- `Theme` struct with 5 color roles (Primary, Success, Warning, Error, Accent) — wraps around with modulo for shorter palettes
+- `Find()`, `Names()`, `Labels()` — list and discover themes
+- `Resolve()`, `ResolveColors()` — resolve a theme name + color mode into active colors
+- `SetActive()`, `Active()` — thread-safe theme state via `sync.RWMutex`
+- `Sprintf()`, `SprintfBold()` — ANSI escape code colorization for terminal output
+- `IsDark()` — luminance-based dark/light detection for auto mode
+- Dark/light mode: `auto` uses the configured theme; `dark` forces Dark Theme; `light` forces Light Theme
+- See all themes: `neocut --config` opens the theme picker with live color swatch preview
+
 ### `internal/tui`
 
+- `themehuh.go` — Builds a custom `huh.Theme` from the active theme's role colors using lipgloss. Applied to all huh forms via `Form.WithTheme()`.
 - `form.go` — Interactive processing form using [huh](https://github.com/charmbracelet/huh). Active when `--tui` flag is passed. Returns a populated `config.Config` struct.
-- `configedit.go` — Config editor TUI. Active when `--config` / `-c` flag is passed. Loads, displays, and saves `config.toml` defaults, presets, and history.
+- `configedit.go` — Config editor TUI. Active when `--config` / `-c` flag is passed. Includes theme picker dropdown, color mode selector, and live color swatch preview.
 
 ### `internal/update`
 
@@ -117,6 +131,8 @@ Each internal package has dedicated unit tests in `*_test.go` files:
 | core | `processor_test.go` | fmtDuration (21 sub-cases), SetQuietMode thread safety |
 | ffmpeg | `ffmpeg_test.go` | BinDir, pathContains, addToPATH, downloadURL, which shim |
 | ffmpeg | `download_test.go` | extractZip, downloadWithProgress (HTTP test server) |
+| theme | `theme_test.go` | Find, Names, Labels, Hex, Resolve, ResolveColors, IsDark, SetActive, Sprintf |
+| tui | — | UI integration via huh (no standalone test file) |
 | update | `update_test.go` | DownloadURL, filepathEval |
 | cmd | `root_test.go` | Execute, flag registration, short-form uniqueness |
 

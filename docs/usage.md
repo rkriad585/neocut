@@ -130,13 +130,31 @@ neocut -i input.mp3 -f wav -b 192 -q
 
 Quiet mode: suppresses banner, spinners, and progress. Only prints the output path.
 
+### Using themes
+
+```bash
+# Use the dark theme
+neocut -i podcast.mp3 --theme dark
+
+# Force light mode (overrides theme selection)
+neocut -i lecture.mp3 --color-mode light
+
+# Choose a specific theme + keep auto color mode
+neocut -i interview.mp3 --theme olive_garden_feast --color-mode auto
+
+# Pick a theme in the config editor
+neocut --config
+```
+
+All 13 themes are listed in `neocut --config` with a live color preview. The `--color-mode` flag supports `auto` (use theme's native colors), `dark` (force Dark Theme), or `light` (force Light Theme). Theme and color mode are persisted in `~/.config/neostore/neocut/config.toml`.
+
 ### Interactive TUI mode
 
 ```bash
 neocut --tui
 ```
 
-Launches a [huh](https://github.com/charmbracelet/huh) form where you fill in all options interactively instead of passing flags.
+Launches a [huh](https://github.com/charmbracelet/huh) form where you fill in all options interactively instead of passing flags. The form uses the active theme for its colors.
 
 ### Self-update
 

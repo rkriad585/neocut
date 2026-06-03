@@ -93,8 +93,23 @@ On first run, if ffmpeg is not found on your system, neocut automatically downlo
 
 Output is saved to `~/Downloads/neostore/neocut/yourfile_no_silence.mp3`.
 
+## Customize the look
+
+```bash
+# Apply a dark theme
+neocut -i file.mp3 --theme dark
+
+# Force light colors
+neocut -i file.mp3 --color-mode light
+
+# Browse all 13 themes interactively
+neocut --config
+```
+
+Themes are saved to `~/.config/neostore/neocut/config.toml` and persist across runs.
+
 ## Next steps
 
 - Read the [CLI usage reference](usage.md) for all flags
-- See [configuration](configuration.md) for tuning silence detection
+- See [configuration](configuration.md) for tuning silence detection and themes
 - Check [troubleshooting](troubleshooting.md) if something goes wrong

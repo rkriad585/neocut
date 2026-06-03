@@ -28,7 +28,7 @@ var rootCmd = &cobra.Command{
 It detects silent portions, splits them out, and recombines the
 non-silent segments into a new, tighter audio file.
 
-Output is saved to ~/Downloads/neocut/ by default.
+Output is saved to ~/Downloads/neostore/neocut/ by default.
 Project config is stored in ~/.config/neostore/neocut/`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -47,7 +47,7 @@ func init() {
 
 	rootCmd.Flags().StringVarP(&cfg.InputFile, "input", "i", "", "Input MP3 file")
 	rootCmd.Flags().StringVarP(&cfg.OutputName, "output", "o", "", "Output filename (saved to output-dir)")
-	rootCmd.Flags().StringVarP(&cfg.OutputDir, "output-dir", "d", "", "Output directory (default ~/Downloads/neocut/)")
+	rootCmd.Flags().StringVarP(&cfg.OutputDir, "output-dir", "d", "", "Output directory (default ~/Downloads/neostore/neocut/)")
 	rootCmd.Flags().BoolVarP(&tuiMode, "tui", "t", false, "Use interactive TUI mode")
 	rootCmd.Flags().BoolVarP(&configEditMode, "config", "c", false, "Edit project config interactively")
 	rootCmd.Flags().StringVarP(&cfg.Format, "format", "f", "", "Output format: mp3 (default), wav, flac")

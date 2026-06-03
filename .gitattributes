@@ -1,0 +1,13 @@
+*   text=auto eol=lf
+
+*.go    text diff=golang
+*.md    text diff=markdown
+*.sh    text eol=lf
+*.ps1   text eol=crlf
+*.bat   text eol=crlf
+
+/.version       export-ignore
+/Makefile       export-ignore
+/Dockerfile     export-ignore
+/.dockerignore  export-ignore
+/CMakeLists.txt export-ignore

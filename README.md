@@ -118,7 +118,7 @@ neocut -i input.mp3 [-o output.mp3] [flags]
 |------|-------|---------|-------------|
 | `--input` | `-i` | `""` | Input MP3 file (required) |
 | `--output` | `-o` | auto | Output filename (saved to output-dir) |
-| `--output-dir` | `-d` | `~/Downloads/neocut/` | Output directory |
+| `--output-dir` | `-d` | `~/Downloads/neostore/neocut/` | Output directory |
 | `--tui` | `-t` | `false` | Interactive TUI mode |
 | `--config` | `-c` | `false` | Edit project config interactively (huh TUI) |
 | `--quiet` | `-q` | `false` | Suppress banner, spinners, and progress |
@@ -224,7 +224,7 @@ After processing, neocut shows a summary:
 
 ## Output
 
-- Processed files are saved to `~/Downloads/neocut/`
+- Processed files are saved to `~/Downloads/neostore/neocut/`
 - Default output name: `{input_name}_no_silence.{ext}` (mp3, wav, flac)
 - Default format: MP3 (set via `--format`)
 - Config directory: `~/.config/neostore/neocut/`
@@ -240,7 +240,7 @@ Fetches the latest version from GitHub and replaces the current binary. Works on
 
 ## Project config
 
-neocut stores a JSONL config file at `~/.config/neostore/neocut/config.jsonl`.
+neocut stores a TOML config file at `~/.config/neostore/neocut/config.toml` and a processing history log at `~/.config/neostore/neocut/history.log`.
 
 ### Editing interactively
 
@@ -252,21 +252,43 @@ Opens a TUI (powered by [huh](https://github.com/charmbracelet/huh)) to edit:
 - Default processing parameters
 - View configured presets
 - Browse recent processing history
-- Save changes back to config.jsonl
+- Save changes back to config.toml
 
 ### File format
 
-```jsonl
-{"type":"meta","project":"neocut","version":"1","created":"2026-05-25T04:18:04Z"}
-{"type":"default","min_silence_len":1000,"silence_thresh":-16.0,"keep_silence":100,"seek_step":1,"output_dir":""}
-{"type":"preset","name":"aggressive","min_silence_len":500,"silence_thresh":-24.0,"keep_silence":50,"seek_step":1}
-{"type":"preset","name":"gentle","min_silence_len":2000,"silence_thresh":-10.0,"keep_silence":200,"seek_step":5}
-{"type":"preset","name":"speech","min_silence_len":800,"silence_thresh":-20.0,"keep_silence":80,"seek_step":1}
+```toml
+[default]
+min_silence_len = 1000
+silence_thresh = -16.0
+keep_silence = 100
+seek_step = 1
+output_dir = ""
+
+[[preset]]
+name = "aggressive"
+min_silence_len = 500
+silence_thresh = -24.0
+keep_silence = 50
+seek_step = 1
+
+[[preset]]
+name = "gentle"
+min_silence_len = 2000
+silence_thresh = -10.0
+keep_silence = 200
+seek_step = 5
+
+[[preset]]
+name = "speech"
+min_silence_len = 800
+silence_thresh = -20.0
+keep_silence = 80
+seek_step = 1
 ```
 
-- The `default` entry sets base parameters — override any field with CLI flags
-- `preset` entries are named collections of parameters, loaded via `--preset`
-- `history` entries are appended after each successful run
+- The `[default]` section sets base parameters — override any field with CLI flags
+- `[[preset]]` entries are named collections of parameters, loaded via `--preset`
+- Processing history is appended to `history.log` after each successful run
 - CLI flags always take precedence over config values
 
 ## Testing

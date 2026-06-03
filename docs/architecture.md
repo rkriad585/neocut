@@ -35,12 +35,12 @@ internal/cmd/root.go         ◄── cobra root command
 Responsible for:
 - Reading `.version` file at startup (`ReadVersion()` — checks ldflags, then embedded, then .version file)
 - Printing the banner to stdout (`PrintBanner()`)
-- Resolving the output directory (`GetOutputDir()` — returns `~/Downloads/neocut/` by default)
+- Resolving the output directory (`GetOutputDir()` — returns `~/Downloads/neostore/neocut/` by default)
 - Resolving the config directory (`ConfigDir()` → `~/.config/neostore/neocut/`)
-- JSONL config file management (`jsonl.go`):
-  - `InitConfigFile()` — creates config.jsonl with meta, defaults, and 3 presets (aggressive, gentle, speech)
+- Config file management (`jsonl.go`):
+  - `InitConfigFile()` — creates config.toml with defaults and 3 presets (aggressive, gentle, speech)
   - `ReadConfig()` — returns presets and default entry
-  - `WriteDefaults()` — replaces the default entry in config.jsonl
+  - `WriteDefaults()` — replaces the default section in config.toml
   - `AppendHistory()` — records each processing run
   - `FindPreset()` — case-insensitive preset lookup
 - Holding ldflags-injected values: `Commit`, `PublisherName`, `PublisherEmail`
@@ -81,7 +81,7 @@ Download sources:
 ### `internal/tui`
 
 - `form.go` — Interactive processing form using [huh](https://github.com/charmbracelet/huh). Active when `--tui` flag is passed. Returns a populated `config.Config` struct.
-- `configedit.go` — Config editor TUI. Active when `--config` / `-c` flag is passed. Loads, displays, and saves `config.jsonl` defaults, presets, and history.
+- `configedit.go` — Config editor TUI. Active when `--config` / `-c` flag is passed. Loads, displays, and saves `config.toml` defaults, presets, and history.
 
 ### `internal/update`
 
@@ -113,7 +113,7 @@ Each internal package has dedicated unit tests in `*_test.go` files:
 | Package | Test file | What it covers |
 |---------|-----------|----------------|
 | config | `config_test.go` | ReadVersion, PrintBanner, GetOutputDir, ConfigDir, directories |
-| config | `jsonl_test.go` | InitConfigFile, ReadConfig, WriteDefaults, AppendHistory, FindPreset |
+| config | `jsonl_test.go` | InitConfigFile (TOML), ReadConfig, WriteDefaults, AppendHistory, FindPreset |
 | core | `processor_test.go` | fmtDuration (21 sub-cases), SetQuietMode thread safety |
 | ffmpeg | `ffmpeg_test.go` | BinDir, pathContains, addToPATH, downloadURL, which shim |
 | ffmpeg | `download_test.go` | extractZip, downloadWithProgress (HTTP test server) |

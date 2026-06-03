@@ -7,31 +7,24 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/BurntSushi/toml"
 )
 
-type MetaEntry struct {
-	Type    string `json:"type"`
-	Project string `json:"project"`
-	Version string `json:"version"`
-	Created string `json:"created"`
-}
-
 type DefaultEntry struct {
-	Type          string  `json:"type"`
-	MinSilenceLen int     `json:"min_silence_len"`
-	SilenceThresh float64 `json:"silence_thresh"`
-	KeepSilence   int     `json:"keep_silence"`
-	SeekStep      int     `json:"seek_step"`
-	OutputDir     string  `json:"output_dir"`
+	MinSilenceLen int     `toml:"min_silence_len" json:"min_silence_len"`
+	SilenceThresh float64 `toml:"silence_thresh" json:"silence_thresh"`
+	KeepSilence   int     `toml:"keep_silence" json:"keep_silence"`
+	SeekStep      int     `toml:"seek_step" json:"seek_step"`
+	OutputDir     string  `toml:"output_dir" json:"output_dir"`
 }
 
 type PresetEntry struct {
-	Type          string  `json:"type"`
-	Name          string  `json:"name"`
-	MinSilenceLen int     `json:"min_silence_len"`
-	SilenceThresh float64 `json:"silence_thresh"`
-	KeepSilence   int     `json:"keep_silence"`
-	SeekStep      int     `json:"seek_step"`
+	Name          string  `toml:"name" json:"name"`
+	MinSilenceLen int     `toml:"min_silence_len" json:"min_silence_len"`
+	SilenceThresh float64 `toml:"silence_thresh" json:"silence_thresh"`
+	KeepSilence   int     `toml:"keep_silence" json:"keep_silence"`
+	SeekStep      int     `toml:"seek_step" json:"seek_step"`
 }
 
 type HistoryEntry struct {
@@ -42,16 +35,13 @@ type HistoryEntry struct {
 	Timestamp string `json:"timestamp"`
 }
 
-func ConfigFile() string {
-	dir := ConfigDir()
-	if dir == "" {
-		return ""
-	}
-	return filepath.Join(dir, "config.jsonl")
+type tomlConfig struct {
+	Default DefaultEntry  `toml:"default"`
+	Presets []PresetEntry `toml:"preset"`
 }
 
 func InitConfigFile() error {
-	path := ConfigFile()
+	path := ConfigFile("config.toml")
 	if path == "" {
 		return fmt.Errorf("cannot determine config directory")
 	}
@@ -60,68 +50,97 @@ func InitConfigFile() error {
 		return nil
 	}
 
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return err
+	EnsureConfigDir()
+
+	jsonlPath := ConfigFile("config.jsonl")
+	if data, err := os.ReadFile(jsonlPath); err == nil {
+		var defaults *DefaultEntry
+		var presets []PresetEntry
+		for _, line := range strings.Split(string(data), "\n") {
+			line = strings.TrimSpace(line)
+			if line == "" {
+				continue
+			}
+			var raw struct {
+				Type string `json:"type"`
+			}
+			if json.Unmarshal([]byte(line), &raw) != nil {
+				continue
+			}
+			switch raw.Type {
+			case "default":
+				var d DefaultEntry
+				if json.Unmarshal([]byte(line), &d) == nil {
+					defaults = &d
+				}
+			case "preset":
+				var p PresetEntry
+				if json.Unmarshal([]byte(line), &p) == nil {
+					presets = append(presets, p)
+				}
+			}
+		}
+		if defaults != nil || len(presets) > 0 {
+			cfg := tomlConfig{}
+			if defaults != nil {
+				cfg.Default = *defaults
+			}
+			if len(presets) > 0 {
+				cfg.Presets = presets
+			}
+			return writeTomlConfig(path, cfg)
+		}
 	}
 
-	entries := []string{
-		`{"type":"meta","project":"neocut","version":"1","created":"` + time.Now().UTC().Format(time.RFC3339) + `"}`,
-		`{"type":"default","min_silence_len":1000,"silence_thresh":-16.0,"keep_silence":100,"seek_step":1,"output_dir":""}`,
-		`{"type":"preset","name":"aggressive","min_silence_len":500,"silence_thresh":-24.0,"keep_silence":50,"seek_step":1}`,
-		`{"type":"preset","name":"gentle","min_silence_len":2000,"silence_thresh":-10.0,"keep_silence":200,"seek_step":5}`,
-		`{"type":"preset","name":"speech","min_silence_len":800,"silence_thresh":-20.0,"keep_silence":80,"seek_step":1}`,
+	cfg := tomlConfig{
+		Default: DefaultEntry{
+			MinSilenceLen: 1000,
+			SilenceThresh: -16.0,
+			KeepSilence:   100,
+			SeekStep:      1,
+		},
+		Presets: []PresetEntry{
+			{Name: "aggressive", MinSilenceLen: 500, SilenceThresh: -24.0, KeepSilence: 50, SeekStep: 1},
+			{Name: "gentle", MinSilenceLen: 2000, SilenceThresh: -10.0, KeepSilence: 200, SeekStep: 5},
+			{Name: "speech", MinSilenceLen: 800, SilenceThresh: -20.0, KeepSilence: 80, SeekStep: 1},
+		},
 	}
-
-	return os.WriteFile(path, []byte(strings.Join(entries, "\n")+"\n"), 0644)
+	return writeTomlConfig(path, cfg)
 }
 
 func ReadConfig() ([]PresetEntry, *DefaultEntry, error) {
-	path := ConfigFile()
+	path := ConfigFile("config.toml")
 	if path == "" {
 		return nil, nil, nil
 	}
 
-	data, err := os.ReadFile(path)
-	if err != nil {
+	var cfg tomlConfig
+	if _, err := toml.DecodeFile(path, &cfg); err != nil {
 		return nil, nil, nil
 	}
 
-	var presets []PresetEntry
-	var defaults *DefaultEntry
+	d := cfg.Default
+	return cfg.Presets, &d, nil
+}
 
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-
-		var raw struct {
-			Type string `json:"type"`
-		}
-		if err := json.Unmarshal([]byte(line), &raw); err != nil {
-			continue
-		}
-
-		switch raw.Type {
-		case "default":
-			var d DefaultEntry
-			if err := json.Unmarshal([]byte(line), &d); err == nil {
-				defaults = &d
-			}
-		case "preset":
-			var p PresetEntry
-			if err := json.Unmarshal([]byte(line), &p); err == nil {
-				presets = append(presets, p)
-			}
-		}
+func WriteDefaults(d DefaultEntry) error {
+	path := ConfigFile("config.toml")
+	if path == "" {
+		return fmt.Errorf("cannot determine config directory")
 	}
 
-	return presets, defaults, nil
+	var cfg tomlConfig
+	if _, err := toml.DecodeFile(path, &cfg); err != nil {
+		EnsureConfigDir()
+		cfg = tomlConfig{}
+	}
+	cfg.Default = d
+
+	return writeTomlConfig(path, cfg)
 }
 
 func AppendHistory(cfg *Config) error {
-	path := ConfigFile()
+	path := HistoryFile()
 	if path == "" || cfg == nil {
 		return nil
 	}
@@ -162,42 +181,18 @@ func AppendHistory(cfg *Config) error {
 	return err
 }
 
-func WriteDefaults(d DefaultEntry) error {
-	path := ConfigFile()
-	if path == "" {
-		return fmt.Errorf("cannot determine config directory")
-	}
-
-	data, err := os.ReadFile(path)
-	if err != nil {
+func writeTomlConfig(path string, cfg tomlConfig) error {
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
 
-	var newLines []string
-	replaced := false
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-		var raw struct {
-			Type string `json:"type"`
-		}
-		if err := json.Unmarshal([]byte(line), &raw); err == nil && raw.Type == "default" {
-			jsonData, _ := json.Marshal(d)
-			newLines = append(newLines, string(jsonData))
-			replaced = true
-			continue
-		}
-		newLines = append(newLines, line)
+	var buf strings.Builder
+	if err := toml.NewEncoder(&buf).Encode(cfg); err != nil {
+		return err
 	}
 
-	if !replaced {
-		jsonData, _ := json.Marshal(d)
-		newLines = append(newLines, string(jsonData))
-	}
-
-	return os.WriteFile(path, []byte(strings.Join(newLines, "\n")+"\n"), 0644)
+	return os.WriteFile(path, []byte(buf.String()), 0644)
 }
 
 func FindPreset(presets []PresetEntry, name string) *PresetEntry {

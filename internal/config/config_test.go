@@ -125,7 +125,7 @@ func TestGetOutputDir(t *testing.T) {
 			t.Fatal(err)
 		}
 		got := GetOutputDir(nil)
-		want := filepath.Join(home, "Downloads", "neocut")
+		want := filepath.Join(home, "Downloads", "neostore", "neocut")
 		if got != want {
 			t.Errorf("expected %s, got %s", want, got)
 		}
@@ -138,7 +138,7 @@ func TestGetOutputDir(t *testing.T) {
 		}
 		cfg := &Config{OutputDir: ""}
 		got := GetOutputDir(cfg)
-		want := filepath.Join(home, "Downloads", "neocut")
+		want := filepath.Join(home, "Downloads", "neostore", "neocut")
 		if got != want {
 			t.Errorf("expected %s, got %s", want, got)
 		}
@@ -162,11 +162,22 @@ func TestConfigFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got := ConfigFile()
-	want := filepath.Join(home, ".config", "neostore", "neocut", "config.jsonl")
-	if got != want {
-		t.Errorf("expected %s, got %s", want, got)
-	}
+
+	t.Run("toml config path", func(t *testing.T) {
+		got := ConfigFile("config.toml")
+		want := filepath.Join(home, ".config", "neostore", "neocut", "config.toml")
+		if got != want {
+			t.Errorf("expected %s, got %s", want, got)
+		}
+	})
+
+	t.Run("history log path", func(t *testing.T) {
+		got := HistoryFile()
+		want := filepath.Join(home, ".config", "neostore", "neocut", "history.log")
+		if got != want {
+			t.Errorf("expected %s, got %s", want, got)
+		}
+	})
 }
 
 func TestEnsureConfigDir(t *testing.T) {

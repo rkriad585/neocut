@@ -91,7 +91,7 @@ neocut -i path/to/your/file.mp3
 
 On first run, if ffmpeg is not found on your system, neocut automatically downloads it to `~/.config/neostore/neocut/bin/`.
 
-Output is saved to `~/Downloads/neocut/yourfile_no_silence.mp3`.
+Output is saved to `~/Downloads/neostore/neocut/yourfile_no_silence.mp3`.
 
 ## Next steps
 

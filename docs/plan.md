@@ -73,7 +73,7 @@ Result: old binary deleted, new one never moved, leaving no binary at all.
 ### ✅ 8. Unit tests
 
 Added 7 test files with 85+ tests across all 6 internal packages:
-- config (config + jsonl): 10 tests
+- config (config + jsonl/toml): 10 tests
 - core: 3 tests (21 sub-cases for fmtDuration)
 - ffmpeg (ffmpeg + download): 21 tests
 - update: 7 tests
@@ -144,6 +144,21 @@ Added standard open-source repository files:
 
 ---
 
+## v1.0.3 — TOML config system
+
+### ✅ 13. Switch from JSONL to TOML config
+
+- Config file changed from `config.jsonl` to `config.toml` at `~/.config/neostore/neocut/`
+- Processing history moved to separate `history.log` file in the same directory
+- Output directory changed from `~/Downloads/neocut/` to `~/Downloads/neostore/neocut/`
+- Added `github.com/BurntSushi/toml` dependency for TOML parsing
+- Added `ConfigFile(name string) string` and `HistoryFile() string` helpers
+- Added `.gitattributes` with standard Go project settings
+- Automatic migration from `config.jsonl` → `config.toml` on first run
+- All docs updated to reflect new paths and TOML format
+
+---
+
 ## Future
 
 ### 10. `--save` flag (persist current params)
@@ -152,7 +167,7 @@ Save current CLI flags as config default or named preset.
 
 ### 11. `--preset list` / `list` command
 
-List available presets and history from config.jsonl.
+List available presets and history from config.toml + history.log.
 
 ## Effort estimate
 
@@ -170,5 +185,6 @@ List available presets and history from config.jsonl.
 | Replace batch script (real fix) | medium | v1.0.2 | ✅ Done |
 | Open-source files | low | v1.0.2 | ✅ Done |
 | CI/CD release workflow | medium | v1.0.2 | ✅ Done |
+| TOML config system | medium | v1.0.3 | ✅ Done |
 | `--save` | medium | — | ❌ Pending |
 | `--preset list` / `list` cmd | low | — | ❌ Pending |

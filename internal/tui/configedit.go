@@ -95,7 +95,7 @@ func RunConfigEditor() error {
 				Value(&seekStep),
 			huh.NewInput().
 				Title("Output Directory").
-				Description("Leave empty for ~/Downloads/neocut/").
+				Description("Leave empty for ~/Downloads/neostore/neocut/").
 				Value(&outputDir),
 		),
 		huh.NewGroup(
@@ -127,7 +127,6 @@ func RunConfigEditor() error {
 	}
 
 	if err := config.WriteDefaults(config.DefaultEntry{
-		Type:          "default",
 		MinSilenceLen: minSilenceLen,
 		SilenceThresh: silenceThresh,
 		KeepSilence:   keepSilence,
@@ -137,12 +136,12 @@ func RunConfigEditor() error {
 		return fmt.Errorf("failed to save config: %w", err)
 	}
 
-	fmt.Println("  Defaults saved to config.jsonl")
+	fmt.Println("  Defaults saved to config.toml")
 	return nil
 }
 
 func readHistory() ([]string, error) {
-	path := config.ConfigFile()
+	path := config.HistoryFile()
 	if path == "" {
 		return nil, nil
 	}
@@ -152,11 +151,15 @@ func readHistory() ([]string, error) {
 		return nil, nil
 	}
 
+	allLines := strings.Split(strings.TrimSpace(string(data)), "\n")
 	var lines []string
-	count := 0
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(line)
-		if !strings.Contains(line, `"type":"history"`) {
+	start := 0
+	if len(allLines) > 5 {
+		start = len(allLines) - 5
+	}
+	for i := start; i < len(allLines); i++ {
+		line := strings.TrimSpace(allLines[i])
+		if line == "" {
 			continue
 		}
 		var h config.HistoryEntry
@@ -168,10 +171,6 @@ func readHistory() ([]string, error) {
 			ts = ts[:10]
 		}
 		lines = append(lines, fmt.Sprintf("  %s  %s → %s  (%s)", ts, h.Input, h.Output, h.Dir))
-		count++
-		if count >= 5 {
-			break
-		}
 	}
 	if len(lines) == 0 {
 		lines = append(lines, "  No history yet.")

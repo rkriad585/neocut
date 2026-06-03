@@ -2,13 +2,13 @@
 
 ## CLI flags
 
-All configuration is passed via CLI flags. Persistent defaults and presets are stored in `~/.config/neostore/neocut/config.jsonl`.
+All configuration is passed via CLI flags. Persistent defaults and presets are stored in `~/.config/neostore/neocut/config.toml`.
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `-i / --input` | `""` | Input MP3 file path (required unless using `--tui`) |
 | `-o / --output` | auto | Output filename; defaults to `{input}_no_silence.{format}` |
-| `-d / --output-dir` | `~/Downloads/neocut/` | Custom output directory |
+| `-d / --output-dir` | `~/Downloads/neostore/neocut/` | Custom output directory |
 | `-q / --quiet` | `false` | Suppress banner, spinners, and progress |
 | `-f / --format` | `mp3` | Output codec: `mp3`, `wav`, `flac` |
 | `-b / --bitrate` | `0` | Output bitrate in kbps (`0` = codec default) |
@@ -17,20 +17,20 @@ All configuration is passed via CLI flags. Persistent defaults and presets are s
 | `-s / --silence-thresh` | `-16` dBFS | Volume threshold; segments below this are considered silence |
 | `-k / --keep-silence` | `100` ms | Silence to preserve at the boundaries of kept segments |
 | `-e / --seek-step` | `1` ms | Precision of silence detection (lower = more accurate but slower) |
-| `--preset` | `""` | Load a named preset from config.jsonl (`aggressive`, `gentle`, `speech`) |
+| `--preset` | `""` | Load a named preset from config.toml (`aggressive`, `gentle`, `speech`) |
 | `-c / --config` | `false` | Edit project config interactively via TUI |
 | `-t / --tui` | `false` | Launch interactive form instead of parsing flags |
 
-## Config file: config.jsonl
+## Config file: config.toml
 
-Located at `~/.config/neostore/neocut/config.jsonl`, this JSONL file stores:
+Located at `~/.config/neostore/neocut/config.toml`, this TOML file stores:
 
-| Entry type | Purpose |
-|------------|---------|
-| `meta` | Project metadata (version, creation time) |
-| `default` | Persistent default values for all flags |
-| `preset` | Named presets (e.g. `aggressive`, `gentle`, `speech`) |
-| `history` | Processing history with timestamps |
+| Section | Purpose |
+|---------|---------|
+| `[default]` | Persistent default values for all flags |
+| `[[preset]]` | Named presets (e.g. `aggressive`, `gentle`, `speech`) |
+
+Processing history is stored in a separate `history.log` file in the same directory.
 
 Defaults and presets are only applied to flags NOT explicitly set by the user on the command line. CLI flags always take precedence.
 
@@ -79,8 +79,8 @@ The step size in milliseconds for detecting silence. Lower values give more prec
 
 | Directory | Purpose | Configurable |
 |-----------|---------|-------------|
-| `~/Downloads/neocut/` | Default output directory for processed files | Via `--output-dir` / `-d` |
-| `~/.config/neostore/neocut/` | Config and runtime directory (ffmpeg binary, which.cmd shim, config.jsonl) | No |
+| `~/Downloads/neostore/neocut/` | Default output directory for processed files | Via `--output-dir` / `-d` |
+| `~/.config/neostore/neocut/` | Config and runtime directory (ffmpeg binary, which.cmd shim, config.toml, history.log) | No |
 | `~/.config/neostore/neocut/bin/` | Downloaded ffmpeg and installed neocut binary | No |
 
 ## TUI mode

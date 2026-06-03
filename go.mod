@@ -3,6 +3,7 @@ module neocut
 go 1.25.0
 
 require (
+	github.com/BurntSushi/toml v1.6.0
 	github.com/Vernacular-ai/godub v0.1.6
 	github.com/charmbracelet/huh v1.0.0
 	github.com/spf13/cobra v1.10.2

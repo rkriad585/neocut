@@ -84,7 +84,7 @@ func GetOutputDir(cfg *Config) string {
 	if err != nil {
 		return "."
 	}
-	return filepath.Join(home, "Downloads", "neocut")
+	return filepath.Join(home, "Downloads", "neostore", "neocut")
 }
 
 func ConfigDir() string {
@@ -103,4 +103,16 @@ func EnsureConfigDir() {
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		fmt.Printf("Warning: could not create config dir: %v\n", err)
 	}
+}
+
+func ConfigFile(name string) string {
+	dir := ConfigDir()
+	if dir == "" {
+		return ""
+	}
+	return filepath.Join(dir, name)
+}
+
+func HistoryFile() string {
+	return ConfigFile("history.log")
 }

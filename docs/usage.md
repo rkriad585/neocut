@@ -13,7 +13,7 @@ neocut [command]
 |------|-------|------|---------|-------------|
 | `--input` | `-i` | string | `""` | Path to the input MP3 file |
 | `--output` | `-o` | string | auto | Output filename (saved to output-dir) |
-| `--output-dir` | `-d` | string | `~/Downloads/neocut/` | Custom output directory |
+| `--output-dir` | `-d` | string | `~/Downloads/neostore/neocut/` | Custom output directory |
 | `--tui` | `-t` | bool | `false` | Launch interactive TUI form |
 | `--config` | `-c` | bool | `false` | Edit project config interactively |
 | `--quiet` | `-q` | bool | `false` | Suppress banner, spinners, and progress |
@@ -44,7 +44,7 @@ neocut [command]
 neocut -i podcast_episode.mp3
 ```
 
-Loads `podcast_episode.mp3`, removes silent portions, saves to `~/Downloads/neocut/podcast_episode_no_silence.mp3`.
+Loads `podcast_episode.mp3`, removes silent portions, saves to `~/Downloads/neostore/neocut/podcast_episode_no_silence.mp3`.
 
 ### Custom output name
 
@@ -78,7 +78,7 @@ neocut -i interview.mp3 -m 2000 -s -12 -k 200
 neocut -i input.mp3 -d /tmp/processed
 ```
 
-Saves output to `/tmp/processed/input_no_silence.mp3` instead of `~/Downloads/neocut/`.
+Saves output to `/tmp/processed/input_no_silence.mp3` instead of `~/Downloads/neostore/neocut/`.
 
 ### Quiet mode (scripting)
 
@@ -102,7 +102,7 @@ Lowers the seek step to 0.5ms for more precise silence boundaries (slower proces
 neocut -i recording.mp3 --format flac --bitrate 320
 ```
 
-Exports to `~/Downloads/neocut/recording_no_silence.flac` at 320 kbps (FLAC supports lossless at 1411 kbps by default).
+Exports to `~/Downloads/neostore/neocut/recording_no_silence.flac` at 320 kbps (FLAC supports lossless at 1411 kbps by default).
 
 ### WAV output
 
@@ -110,7 +110,7 @@ Exports to `~/Downloads/neocut/recording_no_silence.flac` at 320 kbps (FLAC supp
 neocut -i lecture.mp3 --format wav
 ```
 
-Exports to `~/Downloads/neocut/lecture_no_silence.wav`.
+Exports to `~/Downloads/neostore/neocut/lecture_no_silence.wav`.
 
 ### Dry run
 
@@ -174,7 +174,7 @@ neocut completion powershell | Out-String | Invoke-Expression
 neocut -c
 ```
 
-Opens an interactive TUI to edit `~/.config/neostore/neocut/config.jsonl`:
+Opens an interactive TUI to edit `~/.config/neostore/neocut/config.toml`:
 
 1. **Default parameters** — set min silence length, silence threshold, keep silence, seek step, output directory
 2. **Presets overview** — shows all configured presets with their values
@@ -199,7 +199,7 @@ After a successful run, neocut displays a summary:
 
 ## Output
 
-- All processed files go to `~/Downloads/neocut/`
+- All processed files go to `~/Downloads/neostore/neocut/`
 - Default naming: `{input_filename_without_ext}_no_silence.{ext}`
 - Output format: MP3 (default), WAV, or FLAC — set via `--format`
 - Output bitrate configurable via `--bitrate` (applies to MP3, FLAC)

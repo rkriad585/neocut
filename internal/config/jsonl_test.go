@@ -2,7 +2,6 @@ package config
 
 import (
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -30,10 +29,10 @@ func TestInitConfigFile(t *testing.T) {
 		t.Fatalf("InitConfigFile() error: %v", err)
 	}
 
-	path := ConfigFile()
+	path := ConfigFile("config.toml")
 	data, err := os.ReadFile(path)
 	if err != nil {
-		t.Fatalf("config file should exist: %v", err)
+		t.Fatalf("config.toml should exist: %v", err)
 	}
 
 	content := string(data)
@@ -42,11 +41,13 @@ func TestInitConfigFile(t *testing.T) {
 		match  string
 		expect bool
 	}{
-		{"meta entry", `"type":"meta"`, true},
-		{"default entry", `"type":"default"`, true},
-		{"aggressive preset", `"type":"preset"`, true},
-		{"gentle preset", `"name":"gentle"`, true},
-		{"speech preset", `"name":"speech"`, true},
+		{"default section", "[default]", true},
+		{"preset section", "[[preset]]", true},
+		{"aggressive preset", `name = "aggressive"`, true},
+		{"gentle preset", `name = "gentle"`, true},
+		{"speech preset", `name = "speech"`, true},
+		{"min_silence_len", "min_silence_len", true},
+		{"silence_thresh", "silence_thresh", true},
 	}
 	for _, c := range checks {
 		t.Run(c.name, func(t *testing.T) {
@@ -128,30 +129,6 @@ func TestReadConfig(t *testing.T) {
 			t.Error("defaults should be nil when no config file")
 		}
 	})
-
-	t.Run("malformed lines are skipped", func(t *testing.T) {
-		setTempHomeDir(t)
-		path := ConfigFile()
-		os.MkdirAll(filepath.Dir(path), 0755)
-		content := `{"type":"meta","project":"neocut"}
-not-json
-{"type":"default","min_silence_len":500,"silence_thresh":-20.0,"keep_silence":50,"seek_step":1,"output_dir":""}
-`
-		if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-			t.Fatal(err)
-		}
-
-		presets, defaults, err := ReadConfig()
-		if err != nil {
-			t.Fatalf("ReadConfig() error: %v", err)
-		}
-		if defaults == nil {
-			t.Fatal("defaults should not be nil")
-		}
-		if len(presets) != 0 {
-			t.Errorf("expected 0 presets, got %d", len(presets))
-		}
-	})
 }
 
 func TestWriteDefaults(t *testing.T) {
@@ -160,7 +137,6 @@ func TestWriteDefaults(t *testing.T) {
 		InitConfigFile()
 
 		newDefault := DefaultEntry{
-			Type:          "default",
 			MinSilenceLen: 999,
 			SilenceThresh: -30.0,
 			KeepSilence:   50,
@@ -186,19 +162,14 @@ func TestWriteDefaults(t *testing.T) {
 		}
 	})
 
-	t.Run("adds default if none exists", func(t *testing.T) {
+	t.Run("creates file if none exists", func(t *testing.T) {
 		setTempHomeDir(t)
-		path := ConfigFile()
-		os.MkdirAll(filepath.Dir(path), 0755)
-		os.WriteFile(path, []byte(`{"type":"meta","project":"neocut"}`+"\n"), 0644)
 
 		newDefault := DefaultEntry{
-			Type:          "default",
 			MinSilenceLen: 500,
 			SilenceThresh: -16.0,
 			KeepSilence:   100,
 			SeekStep:      1,
-			OutputDir:     "",
 		}
 		if err := WriteDefaults(newDefault); err != nil {
 			t.Fatalf("WriteDefaults() error: %v", err)
@@ -225,7 +196,7 @@ func TestAppendHistory(t *testing.T) {
 			t.Fatalf("AppendHistory() error: %v", err)
 		}
 
-		data, _ := os.ReadFile(ConfigFile())
+		data, _ := os.ReadFile(HistoryFile())
 		lines := strings.Split(strings.TrimSpace(string(data)), "\n")
 		lastLine := lines[len(lines)-1]
 
@@ -255,7 +226,7 @@ func TestAppendHistory(t *testing.T) {
 		}
 		AppendHistory(cfg)
 
-		data, _ := os.ReadFile(ConfigFile())
+		data, _ := os.ReadFile(HistoryFile())
 		if !strings.Contains(string(data), "audio_no_silence.mp3") {
 			t.Errorf("history should contain generated output name")
 		}

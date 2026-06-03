@@ -10,7 +10,7 @@ Given an MP3 file with pauses, gaps, or silent sections, neocut:
 2. **Detects silence** using configurable threshold, minimum length, and seek precision
 3. **Splits** on silence boundaries, discarding the silent chunks
 4. **Recombines** the remaining audio segments into one continuous file
-5. **Exports** the result as MP3 (or WAV/FLAC via `--format`) to `~/Downloads/neocut/`
+5. **Exports** the result as MP3 (or WAV/FLAC via `--format`) to `~/Downloads/neostore/neocut/`
 
 Every step shows an animated spinner or progress bar. Panics during silence detection are recovered gracefully.
 
@@ -41,7 +41,7 @@ neocut/
 │   ├── config/
 │   │   ├── config.go            # Config struct, banner, version, directories
 │   │   ├── config_test.go       # ReadVersion, GetOutputDir, ConfigDir tests
-│   │   ├── jsonl.go             # JSONL config I/O (defaults, presets, history)
+│   │   ├── jsonl.go             # TOML config I/O (defaults, presets) + history.log
 │   │   ├── jsonl_test.go        # InitConfigFile, ReadConfig, WriteDefaults tests
 │   │   ├── gen.go               # go:generate helper (.version → version.txt)
 │   │   └── version.txt          # Embedded version file
@@ -96,7 +96,7 @@ The workflow file is at `.github/workflows/release.yml`.
 | CLI framework | [cobra](https://github.com/spf13/cobra) |
 | Audio processing | [godub](https://github.com/Vernacular-ai/godub) (vendored + patched) |
 | TUI forms | [huh](https://github.com/charmbracelet/huh) |
-| Config format | JSONL (JSON Lines) |
+| Config format | TOML (`config.toml`) |
 | Audio codec | ffmpeg (auto-downloaded) |
 
 ## Version
